@@ -26,14 +26,11 @@
         } else {
             // Pastikan file benar-benar ada di storage sebelum ditampilkan
             $path = public_path('storage/' . $preview);
-            $defaultPreview = file_exists($path) ? asset('storage/' . $preview) : '';
+            $defaultPreview = file_exists($path) ? asset('storage/' . $preview) : 'sadfasdfas';
         }
     } else {
         $defaultPreview = '';
     }
-
-    // dd($preview, $defaultPreview);
-
 @endphp
 
 <div {{ $styleAttributes->class($classes) }} data-flux-input-file wire:ignore tabindex="0" x-data="{
@@ -83,7 +80,10 @@
         <div x-cloak x-show="!previewUrl" class="w-full text-xs font-semibold text-center">No file chosen</div>
     </div>
 
-    {{-- <div class="" x-text='previewUrl'></div> --}}
+    <div class="">{{ $preview }}</div>
+    <div class="">{{ $defaultPreview }}</div>
+
+    <div class="" x-text='previewUrl'></div>
 
 
 

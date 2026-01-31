@@ -22,7 +22,6 @@ class BussinessInfo extends Component
 
     public $preview;
 
-
     #[Validate('required')]
     public $name = '', $tenor = 0;
 
@@ -110,7 +109,6 @@ class BussinessInfo extends Component
         $this->representative = $user->bussinesses?->representative ?? null;
         $this->phone = $user->bussinesses?->phone ?? null;
     }
-
 
     public function render()
     {

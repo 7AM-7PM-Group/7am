@@ -10,6 +10,8 @@ Volt::route('/', 'home')->name('home');
 Volt::route('reservation', 'reservation-create')->name('reservation');
 Volt::route('loyality-card', 'loyality-home')->name('loyality.home');
 
+Volt::route('promotions', 'promotion')->name('promotion');
+
 Route::middleware(['auth', 'verified'])->group(function () {
     Volt::route('settings/profile', 'profile')->name('settings.profile');
     Volt::route('settings/address', 'address')->name('settings.address');
@@ -40,6 +42,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Volt::route('admins', 'admin-index')->name('admin.index');
 
     Volt::route('redeem-reward', 'redeem-index')->name('redeem.index');
+    Volt::route('our-promotions', 'promotion-index')->name('promotion.index');
 });
 
 Route::prefix('b2b')->group(function () {

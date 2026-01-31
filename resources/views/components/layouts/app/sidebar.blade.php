@@ -72,6 +72,9 @@
             @endif
             @if (in_array(Auth::user()->role, ['admin', 'accounting']))
                 <flux:navlist.group :heading="__('Admin')" class="grid">
+                    <flux:navlist.item :href="route('promotion.index')"
+                        :current="request()->routeIs('promotion.index')" wire:navigate>
+                        {{ __('Promotions') }}</flux:navlist.item>
                     <flux:navlist.item :href="route('admin.index')" :current="request()->routeIs('admin.index')"
                         wire:navigate>
                         {{ __('Admins') }}</flux:navlist.item>

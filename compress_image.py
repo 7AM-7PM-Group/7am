@@ -2,7 +2,7 @@ import os
 from PIL import Image, ImageOps
 
 # Folder utama tempat gambar berada
-BASE_DIR = r"D:\laragon\www\hiland1280\public\assets"
+BASE_DIR = r"C:\Users\merta\Downloads\Compressed\WHITE-20260126T074815Z-1-001\WHITE"
 
 # Kualitas kompresi (0–100)
 QUALITY = 30

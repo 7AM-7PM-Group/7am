@@ -16,7 +16,9 @@ class Payment extends Component
 
     public function mount($slug)
     {
+        return redirect()->route('history');
         try {
+
             $this->transaction = Transaction::where('slug', $slug)->first();
 
             if (!$this->transaction) {
