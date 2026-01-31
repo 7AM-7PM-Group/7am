@@ -23,6 +23,6 @@ class ApiTestController extends Controller
         // Contoh: migrasi tabel users dari SQLite ke MySQL
         $user = User::find(25);
 
-        dd($user, $);
+        // dd($user, $);
     }
 }
