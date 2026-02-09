@@ -7,11 +7,9 @@
     <flux:container class="space-y-6">
         @foreach ($promotions as $promotion)
             <div class="md:flex even:md:flex-row-reverse md:flex-wrap">
-                <div class="md:w-9/24 aspect-4/3">
-                    <img alt="{{ $promotion->title }}" class="w-full rounded-lg "
-                        src="{{ asset('storage/' . $promotion->image) }}">
+                <div class="md:w-7/24 aspect-3/4 bg-center bg-no-repeat bg-cover " style="background-image: url({{ asset('storage/' . $promotion->image) }})">
                 </div>
-                <div class="md:w-15/24 flex flex-col p-4 space-y-4">
+                <div class="md:w-17/24 flex flex-col p-4 space-y-4">
                     <h2 class="text-xl text-center font-semibold">{{ $promotion->title }}</h2>
                     <p class="text-gray-700 text-sm">{{ $promotion->description }}</p>
                 </div>
