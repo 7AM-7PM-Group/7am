@@ -4,21 +4,19 @@
         <img alt="Promotion Hero" class="md:h-1/5 h-1/3" src="{{ asset('assets/7am.png') }}">
     </div>
 
-    <flux:container class="space-y-6">
-        @foreach ($promotions as $promotion)
-            <div class="md:flex even:md:flex-row-reverse md:flex-wrap">
-                <div class="md:w-9/24 aspect-4/3">
-                    <img alt="{{ $promotion->title }}" class="w-full rounded-lg "
-                        src="{{ asset('storage/' . $promotion->image) }}">
+    <flux:container class="space-y-6 mt-8">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+            @foreach ($promotions as $promotion)
+                <div class="bg-white rounded-2xl overflow-hidden shadow-xl card-hover border border-orange-100">
+                    <div class="w-full aspect-4/6 bg-cover bg-no-repeat bg-center "
+                        style="background-image: url({{ asset('storage/' . $promotion->image) }})">
+                    </div>
+                    <div class="p-6">
+                        <h4 class="font-bold text-xl mb-2">{{ $promotion->title }}</h4>
+                        <div class="">{{ $promotion->description }}</div>
+                    </div>
                 </div>
-                <div class="md:w-15/24 flex flex-col p-4 space-y-4">
-                    <h2 class="text-xl text-center font-semibold">{{ $promotion->title }}</h2>
-                    <p class="text-gray-700 text-sm">{{ $promotion->description }}</p>
-                </div>
-                <div class=" mt-4! w-full">
-                    <flux:separator />
-                </div>
-            </div>
-        @endforeach
+            @endforeach
+        </div>
     </flux:container>
 </div>
