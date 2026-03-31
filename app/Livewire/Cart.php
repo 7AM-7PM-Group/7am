@@ -215,10 +215,7 @@ class Cart extends Component
 
                 DB::commit();
                 Mail::to(Auth::user()->email)->queue(new \App\Mail\Order\Order($transaction->slug));
-                if (Auth::user()->bussinesses->tenor > 0) {
-                    $this->redirect(route('history'));
-                }
-                $this->redirect(route('checkout', ['slug' => $transaction->slug]));
+                $this->redirect(route('history'));
             } catch (\Throwable $th) {
                 DB::rollBack();
                 $this->dispatch('modal-close', name: 'checkoutModal');
