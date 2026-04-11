@@ -77,9 +77,9 @@
                                     </div>
                                     <div>
                                         <div class="font-semibold text-gray-800 dark:text-white">
-                                            {{ $itm->product->name }}</div>
+                                            {{ $itm->product->name ?? '' }}</div>
                                         <div class="text-xs text-gray-500 dark:text-neutral-300">
-                                            {{ $itm->product->category->name }}</div>
+                                            {{ $itm->product->category->name ?? '' }}</div>
                                     </div>
                                 </div>
 
