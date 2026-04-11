@@ -73,7 +73,7 @@
                                 <!-- Product Info -->
                                 <div class="col-span-2 flex items-center gap-3">
                                     <div class="w-20 h-20 rounded-lg bg-center bg-cover bg-no-repeat border border-gray-200 shadow-sm"
-                                        style="background-image: url('{{ $itm->product->image_url }}')">
+                                        style="background-image: url('{{ $itm->product->image_url ?? asset('assets/No-Picture-Found.png')  }}')">
                                     </div>
                                     <div>
                                         <div class="font-semibold text-gray-800 dark:text-white">
