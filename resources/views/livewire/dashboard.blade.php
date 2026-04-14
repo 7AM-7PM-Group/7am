@@ -8,7 +8,7 @@
                 Rp. {{ number_format($earningThisMonth, 0, ',', '.') }}
             </div>
             <div class=" {{ $earningRatio < 0 ? 'text-rose-500' : 'text-green-400' }}">
-                {{ $earningRatio }}% {{ $earningRatio < 0 ? 'less' : 'more' }} from last month
+                {{ number_format($earningRatio, 0, ',', '.') }}% {{ $earningRatio < 0 ? 'less' : 'more' }} from last month
             </div>
         </div>
         <div class="rounded dark:bg-gray-700 p-4 bg-sky-50">
@@ -19,7 +19,7 @@
                 {{ number_format($transactionThisMonth, 0, ',', '.') }}
             </div>
             <div class=" {{ $transactionRatio < 0 ? 'text-rose-500' : 'text-green-400' }}">
-                {{ $transactionRatio }}% {{ $transactionRatio < 0 ? 'less' : 'more' }} from last month
+                {{ number_format($transactionRatio, 0, ',', '.') }}% {{ $transactionRatio < 0 ? 'less' : 'more' }} from last month
             </div>
         </div>
         <div class="rounded dark:bg-gray-700 p-4 bg-teal-50">
@@ -30,18 +30,18 @@
                 {{ number_format($productSoldThisMonth, 0, ',', '.') }}
             </div>
             <div class=" {{ $productSoldRatio < 0 ? 'text-rose-500' : 'text-green-400' }}">
-                {{ $productSoldRatio }}% {{ $productSoldRatio < 0 ? 'less' : 'more' }} from last month
+                {{ number_format($productSoldRatio, 0, ',', '.') }}% {{ $productSoldRatio < 0 ? 'less' : 'more' }} from last month
             </div>
         </div>
         <div class="rounded dark:bg-gray-700 p-4 bg-fuchsia-50">
             <div class="p-1 rounded-full bg-gray-100 dark:bg-gray-800 w-fit">
-                <flux:icon.dollar-sign class="size-10!"></flux:icon.dollar-sign>
+                <flux:icon.users class="size-10!"></flux:icon.users>
             </div>
             <div class="mt-5 md:text-xl font-semibold">
                 {{ number_format($newUserThisMonth, 0, ',', '.') }}
             </div>
             <div class=" {{ $newUserRatio < 0 ? 'text-rose-500' : 'text-green-400' }}">
-                {{ $newUserRatio }}% {{ $newUserRatio < 0 ? 'less' : 'more' }} from last month
+                {{ number_format($newUserRatio, 0, ',', '.') }}% {{ $newUserRatio < 0 ? 'less' : 'more' }} from last month
             </div>
         </div>
     </div>
