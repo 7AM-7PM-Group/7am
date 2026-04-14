@@ -13,7 +13,7 @@
         </div>
         <div class="rounded dark:bg-gray-700 p-4 bg-sky-50">
             <div class="p-1 rounded-full bg-gray-100 dark:bg-gray-800 w-fit">
-                <flux:icon.dollar-sign class="size-10!"></flux:icon.dollar-sign>
+                <flux:icon.notebook-tabs class="size-10!"></flux:icon.notebook-tabs>
             </div>
             <div class="mt-5 md:text-xl font-semibold">
                 {{ number_format($transactionThisMonth, 0, ',', '.') }}
@@ -24,7 +24,7 @@
         </div>
         <div class="rounded dark:bg-gray-700 p-4 bg-teal-50">
             <div class="p-1 rounded-full bg-gray-100 dark:bg-gray-800 w-fit">
-                <flux:icon.dollar-sign class="size-10!"></flux:icon.dollar-sign>
+                <flux:icon.package class="size-10!"></flux:icon.package>
             </div>
             <div class="mt-5 md:text-xl font-semibold">
                 {{ number_format($productSoldThisMonth, 0, ',', '.') }}
