@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ApiTestController;
 use App\Http\Controllers\JurnalAuthController;
+use App\Livewire\EsbLogIndex;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
 
@@ -40,6 +41,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
     Volt::route('types', 'type-index')->name('type.index');
     Volt::route('cards', 'card-index')->name('card.index');
     Volt::route('admins', 'admin-index')->name('admin.index');
+    Route::get('esb-logs', EsbLogIndex::class)->name('esb.logs.index');
 
     Volt::route('redeem-reward', 'redeem-index')->name('redeem.index');
     Volt::route('our-promotions', 'promotion-index')->name('promotion.index');

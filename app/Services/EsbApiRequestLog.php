@@ -46,7 +46,65 @@ class EsbApiRequestLog
 
     public function getAll(array $filters = [])
     {
-        $query = DB::table('esb_api_request_logs')->orderBy('created_at', 'desc');
+        return $this->buildQuery($filters)
+            ->orderBy('created_at', 'desc')
+            ->get();
+    }
+
+    public function paginate(array $filters = [], int $perPage = 50)
+    {
+        return $this->buildQuery($filters)
+            ->orderBy('created_at', 'desc')
+            ->paginate($perPage);
+    }
+
+    public function getStats(array $filters = []): array
+    {
+        $query = $this->buildQuery($filters);
+
+        return [
+            'total' => (clone $query)->count(),
+            'success' => (clone $query)->where('success', true)->count(),
+            'failed' => (clone $query)->where('success', false)->count(),
+            'retried' => (clone $query)->where('retried_with_refresh', true)->count(),
+        ];
+    }
+
+    public function getFilterOptions(): array
+    {
+        return [
+            'methods' => DB::table('esb_api_request_logs')
+                ->whereNotNull('method')
+                ->distinct()
+                ->orderBy('method')
+                ->pluck('method'),
+            'request_sources' => DB::table('esb_api_request_logs')
+                ->whereNotNull('request_source')
+                ->distinct()
+                ->orderBy('request_source')
+                ->pluck('request_source'),
+            'request_types' => DB::table('esb_api_request_logs')
+                ->whereNotNull('request_type')
+                ->distinct()
+                ->orderBy('request_type')
+                ->pluck('request_type'),
+        ];
+    }
+
+    private function buildQuery(array $filters = [])
+    {
+        $query = DB::table('esb_api_request_logs');
+
+        if (isset($filters['search'])) {
+            $search = $filters['search'];
+
+            $query->where(function ($query) use ($search) {
+                $query->where('request_url', 'like', "%{$search}%")
+                    ->orWhere('request_body', 'like', "%{$search}%")
+                    ->orWhere('response_body', 'like', "%{$search}%")
+                    ->orWhere('error_message', 'like', "%{$search}%");
+            });
+        }
 
         if (isset($filters['method'])) {
             $query->where('method', $filters['method']);
@@ -80,7 +138,7 @@ class EsbApiRequestLog
             $query->where('created_at', '<=', $filters['created_before']);
         }
 
-        return $query->get();
+        return $query;
     }
 
     public function getExpiredRecords(int $limit = 1000)

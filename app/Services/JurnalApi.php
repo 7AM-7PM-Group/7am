@@ -44,6 +44,10 @@ class JurnalApi
         curl_setopt($ch, CURLOPT_URL, $this->apiUrl . $path);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
+        // WARNING: Disabling SSL verification is not recommended for production.
+        // Bypass issues with self-signed certificates in dev/sandbox.
+        curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
+        curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
         // Set headers dasar
         $headers = [

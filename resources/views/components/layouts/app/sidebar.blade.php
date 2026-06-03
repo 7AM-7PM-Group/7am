@@ -78,6 +78,9 @@
                     <flux:navlist.item :href="route('admin.index')" :current="request()->routeIs('admin.index')"
                         wire:navigate>
                         {{ __('Admins') }}</flux:navlist.item>
+                    <flux:navlist.item :href="route('esb.logs.index')" :current="request()->routeIs('esb.logs.index')"
+                        wire:navigate>
+                        {{ __('ESB Logs') }}</flux:navlist.item>
                     <flux:navlist.item :href="route('setting.index')" :current="request()->routeIs('setting.index')"
                         wire:navigate>
                         {{ __('Settings') }}</flux:navlist.item>

@@ -28,7 +28,7 @@ class ApiTestController extends Controller
     {
         try {
             $filters = $request->only(['page', 'per_page', 'status', 'start_date', 'end_date']);
-            $transactions = $this->transactionRequest->getTransactions($filters);
+            $transactions = $this->transactionRequest->getTransactions($filters, $this->logContext($request, 'transaction_index'));
 
             return response()->json($transactions);
         } catch (\Exception $exception) {
@@ -40,7 +40,7 @@ class ApiTestController extends Controller
     {
         try {
             $payload = $request->all();
-            $response = $this->transactionRequest->createTransaction($payload);
+            $response = $this->transactionRequest->createTransaction($payload, $this->logContext($request, 'transaction_create'));
 
             return response()->json($response, 201);
         } catch (\Exception $exception) {
@@ -51,7 +51,7 @@ class ApiTestController extends Controller
     public function show($id)
     {
         try {
-            $response = $this->transactionRequest->getTransaction($id);
+            $response = $this->transactionRequest->getTransaction($id, $this->logContext(request(), 'transaction_show'));
 
             return response()->json($response);
         } catch (\Exception $exception) {
@@ -63,7 +63,7 @@ class ApiTestController extends Controller
     {
         try {
             $payload = $request->all();
-            $response = $this->transactionRequest->updateTransaction($id, $payload);
+            $response = $this->transactionRequest->updateTransaction($id, $payload, $this->logContext($request, 'transaction_update'));
 
             return response()->json($response);
         } catch (\Exception $exception) {
@@ -74,11 +74,20 @@ class ApiTestController extends Controller
     public function destroy($id)
     {
         try {
-            $response = $this->transactionRequest->deleteTransaction($id);
+            $response = $this->transactionRequest->deleteTransaction($id, $this->logContext(request(), 'transaction_delete'));
 
             return response()->json($response);
         } catch (\Exception $exception) {
             return response()->json(['error' => $exception->getMessage()], 500);
         }
+    }
+
+    private function logContext(Request $request, string $requestType): array
+    {
+        return [
+            'user_id' => $request->user()?->id,
+            'request_source' => 'user',
+            'request_type' => $requestType,
+        ];
     }
 }
