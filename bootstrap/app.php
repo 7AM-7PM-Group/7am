@@ -4,6 +4,7 @@ use App\Http\Middleware\AdminMiddleware;
 use App\Http\Middleware\CustomerMiddleware;
 use App\Http\Middleware\OutletAdminMiddleware;
 use App\Http\Middleware\SalesAdminMiddleware;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
@@ -25,4 +26,8 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withExceptions(function (Exceptions $exceptions) {
         //
-    })->create();
+    })
+    ->withSchedule(function (Schedule $schedule) {
+        $schedule->command('esb-api:cleanup-expired')->dailyAt('02:00');
+    })
+    ->create();

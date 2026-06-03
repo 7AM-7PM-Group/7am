@@ -99,6 +99,6 @@ Route::prefix('b2b')->middleware(['auth', 'verified', 'admin'])->group(function 
 Volt::route('outlets/{slug}', 'outlet-show')->name('outlet-show');
 
 Route::get('/test-email', [App\Http\Controllers\MailController::class, 'sendTestEmail']);
-route::get('/jurnal/test', [ApiTestController::class, 'index'])->name('jurnal.tests');
+Route::resource('/api/test', ApiTestController::class)->names('jurnal.tests');
 
 require __DIR__ . '/auth.php';
