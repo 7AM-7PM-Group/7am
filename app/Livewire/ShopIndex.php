@@ -25,10 +25,10 @@ class ShopIndex extends Component
     {
         $user = Auth::user();
 
-        // Jika user login, punya relasi bussinesses, dan relasi setCategory pada salah satu bussinesses
-        if ($user && $user->bussinesses && $user->bussinesses->setCategory) {
+        // Jika user login, punya relasi Businesses, dan relasi setCategory pada salah satu Businesses
+        if ($user && $user->Businesses && $user->Businesses->setCategory) {
             // Jika user punya bisnis dan bisnis itu punya setCategory
-            $this->categories = $user->bussinesses?->setCategory?->categories ?? collect();
+            $this->categories = $user->Businesses?->setCategory?->categories ?? collect();
 
             // dd(true, $this->categories);
         } else {
@@ -40,7 +40,7 @@ class ShopIndex extends Component
             // dd(false, $this->categories, $defaultSetCategory);
         }
 
-        // dd(Auth::user()?->bussinesses?->setCategory->id);
+        // dd(Auth::user()?->Businesses?->setCategory->id);
     }
 
     public function resetFilter()
@@ -67,7 +67,7 @@ class ShopIndex extends Component
         // Ambil set_category terbaru langsung dari DB (menghindari relasi Auth yang stale)
         $setCategoryId = null;
         if (Auth::check()) {
-            $setCategoryId = \App\Models\Bussiness::where('user_id', Auth::id())
+            $setCategoryId = \App\Models\Business::where('user_id', Auth::id())
                 ->whereNotNull('set_category_id')
                 ->value('set_category_id');
         }
@@ -88,7 +88,7 @@ class ShopIndex extends Component
 
         // dd([
         //     'auth' => Auth::id(),
-        //     'business_set_category' => \App\Models\Bussiness::where('user_id', Auth::id())->first(),
+        //     'business_set_category' => \App\Models\Business::where('user_id', Auth::id())->first(),
         //     'final_set_category_id' => $setCategoryId,
         // ]);
 

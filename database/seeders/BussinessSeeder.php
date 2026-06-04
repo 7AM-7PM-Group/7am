@@ -2,16 +2,20 @@
 
 namespace Database\Seeders;
 
+use App\Models\Business;
+use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 
-class BussinessSeeder extends Seeder
+class BusinessSeeder extends Seeder
 {
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        //
+        User::factory()->count(10)->create()->each(function ($user) {
+            $user->Business()->save(Business::factory()->make());
+        });
     }
 }

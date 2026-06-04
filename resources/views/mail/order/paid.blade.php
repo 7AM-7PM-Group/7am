@@ -1,5 +1,5 @@
 <x-layouts.mail.default>
-    <p>Hi <strong>{{ $order->user->bussinesses->name ?? '' }}</strong>,</p>
+    <p>Hi <strong>{{ $order->user->Businesses->name ?? '' }}</strong>,</p>
     <p>We have successfully received your payment. Your order is now confirmed and will be processed soon.</p>
 
     <p><strong>Order Details:</strong></p>

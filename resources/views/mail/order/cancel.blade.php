@@ -1,5 +1,5 @@
 <x-layouts.mail.default>
-    <p>Hi <strong>{{ $order->user->bussinesses->name ?? ($order->user->name ?? '') }}</strong>,</p>
+    <p>Hi <strong>{{ $order->user->Businesses->name ?? ($order->user->name ?? '') }}</strong>,</p>
 
     <p>Your order has been <strong>cancelled by
             our admin team</strong>.</p>

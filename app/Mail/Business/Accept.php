@@ -2,7 +2,7 @@
 
 namespace App\Mail\Business;
 
-use App\Models\Bussiness;
+use App\Models\Business;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
@@ -20,7 +20,7 @@ class Accept extends Mailable
      */
     public function __construct($id)
     {
-        $this->user = Bussiness::findOrFail($id)->user;
+        $this->user = Business::findOrFail($id)->user;
     }
 
     /**

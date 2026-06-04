@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Bussiness;
+use App\Models\Business;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
@@ -16,7 +16,7 @@ use Livewire\Component;
 use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
-class BussinessInfo extends Component
+class BusinessInfo extends Component
 {
     use WithFileUploads;
 
@@ -76,7 +76,7 @@ class BussinessInfo extends Component
 
             Auth::user()->update(['business' => 'requested']);
 
-            $business = Bussiness::create($validated);
+            $business = Business::create($validated);
             DB::commit();
             Mail::to(Auth::user()->email)->queue(new \App\Mail\Request_User(Auth::user()->id));
 
@@ -98,20 +98,20 @@ class BussinessInfo extends Component
     public function mount()
     {
         $user = Auth::user();
-        $this->name = $user->bussinesses?->name ?? null;
-        $this->tenor = $user->bussinesses?->tenor ?? 0;
-        $this->npwp = $user->bussinesses?->npwp ?? null;
-        $this->address = $user->bussinesses?->address ?? null;
-        $this->bank = $user->bussinesses?->bank ?? null;
-        $this->account_number = $user->bussinesses?->account_number ?? null;
-        $this->account_name = $user->bussinesses?->account_name ?? null;
-        $this->preview = $user->bussinesses?->id_card ?? null;
-        $this->representative = $user->bussinesses?->representative ?? null;
-        $this->phone = $user->bussinesses?->phone ?? null;
+        $this->name = $user->Businesses?->name ?? null;
+        $this->tenor = $user->Businesses?->tenor ?? 0;
+        $this->npwp = $user->Businesses?->npwp ?? null;
+        $this->address = $user->Businesses?->address ?? null;
+        $this->bank = $user->Businesses?->bank ?? null;
+        $this->account_number = $user->Businesses?->account_number ?? null;
+        $this->account_name = $user->Businesses?->account_name ?? null;
+        $this->preview = $user->Businesses?->id_card ?? null;
+        $this->representative = $user->Businesses?->representative ?? null;
+        $this->phone = $user->Businesses?->phone ?? null;
     }
 
     public function render()
     {
-        return view('livewire.bussiness-info')->layout('components.layouts.app.header', ['title' => "Bussiness Info"]);
+        return view('livewire.Business-info')->layout('components.layouts.app.header', ['title' => "Business Info"]);
     }
 }

@@ -24,7 +24,7 @@ class Checkout extends Component
     public function mount($slug)
     {
 
-        // if (is_null(Auth::user()->bussinesses) || Auth::user()->bussinesses?->status != 'approved') {
+        // if (is_null(Auth::user()->Businesses) || Auth::user()->Businesses?->status != 'approved') {
         //     return redirect(route('b2b-home'))->with('error', "Please Verified Business First!");
         // }
 
@@ -64,7 +64,7 @@ class Checkout extends Component
                 $paymentInvoice = PaymentInvoice::create([
                     'transaction_id' => $this->transaction->id,
                     'midtrans_order_id' => $order_id,
-                    'expired_at' => Auth::user()->bussinesses->tenor == 0 ? now()->setTime(19, 0) : now()->addDay(),
+                    'expired_at' => Auth::user()->Businesses->tenor == 0 ? now()->setTime(19, 0) : now()->addDay(),
                     'snap_token' => $this->snapToken,
                 ]);
             } else {

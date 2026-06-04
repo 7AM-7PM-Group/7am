@@ -14,10 +14,10 @@ class B2bHome extends Component
     public function mount()
     {
         $user = Auth::user();
-        // Jika user login, punya relasi bussinesses, dan relasi setCategory pada salah satu bussinesses
-        if ($user && $user->bussinesses && $user->bussinesses->setCategory) {
+        // Jika user login, punya relasi Businesses, dan relasi setCategory pada salah satu Businesses
+        if ($user && $user->Businesses && $user->Businesses->setCategory) {
             // Jika user punya bisnis dan bisnis itu punya setCategory
-            $setCategory = $user->bussinesses->setCategory->id;
+            $setCategory = $user->Businesses->setCategory->id;
         } else {
             // Jika tidak, gunakan set category default dari setting
             $setCategory = Setting::where('key', 'default_set_category')->value('value');
@@ -34,6 +34,6 @@ class B2bHome extends Component
 
     public function render()
     {
-    return view('livewire.b2b-home')->layout('components.layouts.app.header', ['title' => "Home"]);
+        return view('livewire.b2b-home')->layout('components.layouts.app.header', ['title' => "Home"]);
     }
 }

@@ -5,10 +5,10 @@
 
     <p><strong>Your submission details:</strong></p>
     <ul>
-        <li><strong>Business Name:</strong> {{ $user->bussinesses->name ?? '' }}</li>
-        <li><strong>Representative:</strong> {{ $user->bussinesses->representative ?? '' }}</li>
+        <li><strong>Business Name:</strong> {{ $user->Businesses->name ?? '' }}</li>
+        <li><strong>Representative:</strong> {{ $user->Businesses->representative ?? '' }}</li>
         <li><strong>Email:</strong> {{ $user->email }}</li>
-        <li><strong>Submission Date:</strong> {{ $user->bussinesses->updated_at->format('F j, Y H:i') ?? '' }}</li>
+        <li><strong>Submission Date:</strong> {{ $user->Businesses->updated_at->format('F j, Y H:i') ?? '' }}</li>
     </ul>
 
     <p>Our team is currently reviewing your business information. You will receive an update once your business is

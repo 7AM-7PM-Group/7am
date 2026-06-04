@@ -2,7 +2,7 @@
 
 namespace Database\Seeders;
 
-use App\Models\Bussiness;
+use App\Models\Business;
 use App\Models\User;
 use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
@@ -21,7 +21,7 @@ class UserSeeder extends Seeder
                 'business' => 'requested',
             ]);
 
-            Bussiness::factory()->create([
+            Business::factory()->create([
                 'user_id' => $user->id,
                 'status' => 'requested',
             ]);

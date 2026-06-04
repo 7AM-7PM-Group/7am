@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\Address;
-use App\Models\Bussiness;
+use App\Models\Business;
 use App\Models\Cart;
 use App\Models\Category;
 use App\Models\District;
@@ -42,7 +42,7 @@ class DatabaseSeeder extends Seeder
         foreach (range(1, 10) as $key => $item) {
             // $user = User::factory()->create(['business' => 'requested', 'email' => "user{$item}@admin.com"]);
 
-            // Bussiness::factory()->recycle($user)->create();
+            // Business::factory()->recycle($user)->create();
         }
 
         $user = User::factory()->create([
@@ -111,7 +111,7 @@ class DatabaseSeeder extends Seeder
 
         // Cart::factory(3)->recycle([$user, Product::all()])->create();
 
-        // Bussiness::factory()->recycle($user)->create([
+        // Business::factory()->recycle($user)->create([
         //     'status' => "approved",
         //     'set_category_id' => 1
         // ]);

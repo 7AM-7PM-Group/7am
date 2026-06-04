@@ -22,7 +22,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
 Route::middleware(['auth', 'verified', 'customer'])->group(function () {
     Volt::route('reservation/make', 'reservation-create')->name('reservation.create');
     Volt::route('reservation/history', 'reservation.history')->name('reservation.history');
-    Volt::route('settings/bussiness-info', 'bussiness-info')->name('settings.bussiness-info');
+    Volt::route('settings/Business-info', 'Business-info')->name('settings.Business-info');
 });
 Route::middleware(['auth', 'verified', 'outlet-admin'])->group(function () {
     Volt::route('reservation/', 'reservation-index')->name('reservation.index');

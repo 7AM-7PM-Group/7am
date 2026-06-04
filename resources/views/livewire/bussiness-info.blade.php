@@ -12,13 +12,13 @@
     @endif
     <form wire:submit='save'>
         <div class="mt-10">
-            <flux:separator text="Bussiness Identity">
+            <flux:separator text="Business Identity">
             </flux:separator>
             <div class="space-y-4">
                 <flux:input :readonly="in_array(Auth::user()->business, ['requested', 'accepted'])"
-                    label="Bussiness Name/Outlet Name" required wire:model.live='name'></flux:input>
+                    label="Business Name/Outlet Name" required wire:model.live='name'></flux:input>
                 <flux:input only_number :readonly="in_array(Auth::user()->business, ['requested', 'accepted'])"
-                    label="Bussiness Registration Number" placeholder="NPWP, Tax ID, VAT, or Government-issued number"
+                    label="Business Registration Number" placeholder="NPWP, Tax ID, VAT, or Government-issued number"
                     required wire:model.live='npwp'>
                 </flux:input>
                 <flux:input :readonly="in_array(Auth::user()->business, ['requested', 'accepted'])" label="Address"

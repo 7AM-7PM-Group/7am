@@ -8,7 +8,7 @@
 
     <p><strong>Business details:</strong></p>
     <ul>
-        <li><strong>Business Name:</strong> {{ $user->bussinesses->name ?? '' }}</li>
+        <li><strong>Business Name:</strong> {{ $user->Businesses->name ?? '' }}</li>
     </ul>
 
     <p>You may submit a new request after addressing the issue mentioned above.</p>

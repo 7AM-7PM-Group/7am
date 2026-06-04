@@ -5,7 +5,7 @@
 
     <p><strong>Business details:</strong></p>
     <ul>
-        <li><strong>Business Name:</strong> {{ $user->bussinesses->name ?? '' }}</li>
+        <li><strong>Business Name:</strong> {{ $user->Businesses->name ?? '' }}</li>
     </ul>
 
     <p>You now have access to your business account, B2B ordering, special business pricing, and business profile

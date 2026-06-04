@@ -3,7 +3,7 @@
 namespace App\Livewire;
 
 use Livewire\Component;
-use App\Models\Bussiness;
+use App\Models\Business;
 use App\Models\SetCategory;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
@@ -51,7 +51,7 @@ class BusinessModal extends Component
     public function openEditBusinessModal($id)
     {
         $this->resetValidation();
-        $this->business = Bussiness::find($id);
+        $this->business = Business::find($id);
         $this->setCategory = SetCategory::all();
         $this->id = $this->business->id;
         $this->name = $this->business->name;

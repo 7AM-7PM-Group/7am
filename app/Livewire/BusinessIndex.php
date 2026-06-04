@@ -2,7 +2,7 @@
 
 namespace App\Livewire;
 
-use App\Models\Bussiness;
+use App\Models\Business;
 use App\Models\SetCategory;
 use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\Url;
@@ -34,7 +34,7 @@ class BusinessIndex extends Component
 
     public function openDetailModal($id)
     {
-        $this->business = Bussiness::find($id);
+        $this->business = Business::find($id);
         $this->dispatch('modal-show', name: 'detail-business');
     }
 
@@ -57,7 +57,7 @@ class BusinessIndex extends Component
 
     public function getBusiness()
     {
-        $this->businesses = Bussiness::filters(['search' => $this->search, 'status' => $this->sts])->get();
+        $this->businesses = Business::filters(['search' => $this->search, 'status' => $this->sts])->get();
     }
 
     public function render()

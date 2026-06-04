@@ -74,7 +74,7 @@ class Cart extends Component
         }
 
         try {
-            if (is_null(Auth::user()->bussinesses) || Auth::user()->bussinesses?->status != 'approved') {
+            if (is_null(Auth::user()->Businesses) || Auth::user()->Businesses?->status != 'approved') {
                 Session::flash('error', 'Your business is not approved yet. Please contact admin.');
                 return;
             }
@@ -119,15 +119,15 @@ class Cart extends Component
                     return;
                 }
 
-                if (Auth::user()->bussinesses->minimum_order > 0) {
+                if (Auth::user()->Businesses->minimum_order > 0) {
                     if (Setting::where('key', 'use_tax_inclusive')->value('value') === 'true') {
                         $subtotal = $this->subtotal;
                     } else {
                         $subtotal = $this->subtotal + $this->packaging_fee;
                     }
 
-                    if ($subtotal < Auth::user()->bussinesses->minimum_order) {
-                        Session::flash('error', 'Minimum order for your business is Rp. ' . number_format(Auth::user()->bussinesses->minimum_order, 0, ',', '.'));
+                    if ($subtotal < Auth::user()->Businesses->minimum_order) {
+                        Session::flash('error', 'Minimum order for your business is Rp. ' . number_format(Auth::user()->Businesses->minimum_order, 0, ',', '.'));
                         $this->isProcessing = false;
                         return;
                     }
@@ -155,7 +155,7 @@ class Cart extends Component
                     'total' => $this->subtotal + $this->packaging_fee - $this->countDiscount(),
                     'packaging_fee' => $this->packaging_fee,
                     'shipping_date' => $this->shipping_date,
-                    'due_date' => Carbon::now()->addDays(Auth::user()->bussinesses->tenor)->setTime(19, 0)->toDateTimeString(),
+                    'due_date' => Carbon::now()->addDays(Auth::user()->Businesses->tenor)->setTime(19, 0)->toDateTimeString(),
                     'user_id' => Auth::user()->id,
                     'status' => 'ordered',
                     'note' => $this->note ?? null,
@@ -187,7 +187,7 @@ class Cart extends Component
                         'user_id' => Auth::user()->id,
                         'transaction_id' => $transaction->id,
                         'type' => $this->fulfillment,
-                        'name' => Auth::user()->bussinesses?->name ?? Auth::user()->name ?? '',
+                        'name' => Auth::user()->Businesses?->name ?? Auth::user()->name ?? '',
                         'phone' => Auth::user()->phone,
                         'email' => Auth::user()->email,
                         'address' => $this->outlet?->name ?? '',
@@ -239,7 +239,7 @@ class Cart extends Component
      */
     public function checkPayment()
     {
-        $business = Auth::user()->bussinesses;
+        $business = Auth::user()->Businesses;
         if (is_null($business) || ($business->tenor ?? 0) <= 0) {
             return false;
         }

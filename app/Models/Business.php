@@ -7,12 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder;
 
 
-class Bussiness extends Model
+class Business extends Model
 {
-    /** @use HasFactory<\Database\Factories\BussinessFactory> */
+    /** @use HasFactory<\Database\Factories\BusinessFactory> */
     use HasFactory;
 
     public $guarded = ['id'];
+
+    public $table = 'bussinesses';
 
     public function user()
     {

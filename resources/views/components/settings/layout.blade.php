@@ -2,10 +2,12 @@
     <div class="me-10 w-full pb-4 md:w-[220px]">
         <flux:navlist>
             <flux:navlist.item :href="route('settings.profile')" wire:navigate>{{ __('Profile') }}</flux:navlist.item>
-            {{-- <flux:navlist.item :href="route('settings.bussiness-info')" wire:navigate>{{ __('Bussiness Info') }}</flux:navlist.item> --}}
-            <flux:navlist.item :href="route('settings.address')" wire:navigate>{{ __('My Address') }}</flux:navlist.item>
+            {{-- <flux:navlist.item :href="route('settings.Business-info')" wire:navigate>{{ __('Business Info') }}</flux:navlist.item> --}}
+            <flux:navlist.item :href="route('settings.address')" wire:navigate>{{ __('My Address') }}
+            </flux:navlist.item>
             <flux:navlist.item :href="route('settings.password')" wire:navigate>{{ __('Password') }}</flux:navlist.item>
-            <flux:navlist.item :href="route('settings.appearance')" wire:navigate>{{ __('Appearance') }}</flux:navlist.item>
+            <flux:navlist.item :href="route('settings.appearance')" wire:navigate>{{ __('Appearance') }}
+            </flux:navlist.item>
         </flux:navlist>
     </div>
 
