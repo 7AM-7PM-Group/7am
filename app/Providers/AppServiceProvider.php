@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Services\EsbApiAuth;
 use App\Services\JurnalApi;
 use Illuminate\Support\ServiceProvider;
 
@@ -18,6 +19,10 @@ class AppServiceProvider extends ServiceProvider
                 config('Service.jurnal.secret'),
                 config('Service.jurnal.environment', 'sandbox')
             );
+        });
+
+        $this->app->singleton(EsbApiAuth::class, function () {
+            return new EsbApiAuth(config('ESB.esb_username'), config('ESB.esb_password'), config('ESB.esb_base_url'), config('ESB.esb_environment'));
         });
     }
 

@@ -15,7 +15,7 @@ class TransactionRequest
 
     public function getTransactions(array $filters = [], array $logContext = [])
     {
-        $path = '/api/user';
+        $path = '/api/products';
 
         if (!empty($filters)) {
             $path .= '?' . http_build_query($filters);
@@ -26,7 +26,7 @@ class TransactionRequest
 
     public function getTransaction($id, array $logContext = [])
     {
-        return $this->request->get("/v1/transactions/{$id}", $logContext);
+        return $this->request->get("/api/products/{$id}", $logContext);
     }
 
     public function createTransaction(array $data, array $logContext = [])

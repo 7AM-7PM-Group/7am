@@ -13,9 +13,9 @@ class ProductRequest
         $this->request = $request;
     }
 
-    public function getProducts(array $filters = [])
+    public function getProductLists(array $filters = [])
     {
-        $path = '/v1/products';
+        $path = '/product/list';
 
         if (!empty($filters)) {
             $path .= '?' . http_build_query($filters);
@@ -26,6 +26,6 @@ class ProductRequest
 
     public function getProduct($id)
     {
-        return $this->request->get("/v1/products/{$id}");
+        return $this->request->get("/product/{$id}");
     }
 }

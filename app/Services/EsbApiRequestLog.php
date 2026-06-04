@@ -9,6 +9,8 @@ class EsbApiRequestLog
     private const RETENTION_DAYS = [
         'sync_success' => 30,
         'sync_failed' => 15,
+        'auth_login' => 30,
+        'auth_refresh' => 30,
         'manual_cleanup' => 7,
     ];
 
@@ -47,7 +49,7 @@ class EsbApiRequestLog
     public function getAll(array $filters = [])
     {
         return $this->buildQuery($filters)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->get();
     }
 

@@ -11,17 +11,11 @@ class ApiTestController extends Controller
 {
     private TransactionRequest $transactionRequest;
 
-    public function __construct()
+    public function __construct(EsbApiAuth $auth)
     {
-        $auth = new EsbApiAuth(
-            config('ESB.esb_username'),
-            config('ESB.esb_password'),
-            config('ESB.esb_base_url'),
-            config('ESB.esb_environment', 'sandbox')
-        );
-
         $request = new EsbApiRequest($auth);
         $this->transactionRequest = new TransactionRequest($request);
+        // dd($auth, $request, $this->transactionRequest);
     }
 
     public function index(Request $request)
@@ -32,6 +26,7 @@ class ApiTestController extends Controller
 
             return response()->json($transactions);
         } catch (\Exception $exception) {
+            // dd($exception->getMessage());
             return response()->json(['error' => $exception->getMessage()], 500);
         }
     }

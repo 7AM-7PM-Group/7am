@@ -4,7 +4,7 @@ namespace App\Services\EsbApiRequest;
 
 use App\Services\EsbApiRequest as BaseEsbApiRequest;
 
-class CategoryRequest
+class SubCategoryRequest
 {
     protected BaseEsbApiRequest $request;
 
@@ -13,9 +13,9 @@ class CategoryRequest
         $this->request = $request;
     }
 
-    public function getCategories(array $filters = [])
+    public function getSubCategories(array $filters = [])
     {
-        $path = '/product/category';
+        $path = '/product/sub-category';
 
         if (!empty($filters)) {
             $path .= '?' . http_build_query($filters);
@@ -24,8 +24,8 @@ class CategoryRequest
         return $this->request->get($path);
     }
 
-    public function getCategory($id)
+    public function getSubCategory($id)
     {
-        return $this->request->get("/product/category/{$id}");
+        return $this->request->get("/product/sub-category/{$id}");
     }
 }

@@ -16,9 +16,9 @@ class EsbLogIndex extends Component
     // Filters
     public $search = '';
     public $method = '';
-    public $success = null; // true/false/null
-    public $retried_with_refresh = null; // true/false/null
-    public $user_id = null;
+    public $success = ""; // true/false/null
+    public $retried_with_refresh = ""; // true/false/null
+    public $user_id = 0;
     public $request_source = '';
     public $request_type = '';
     public $created_after = '';
@@ -30,9 +30,9 @@ class EsbLogIndex extends Component
     protected $queryString = [
         'search' => ['except' => ''],
         'method' => ['except' => ''],
-        'success' => ['except' => null],
-        'retried_with_refresh' => ['except' => null],
-        'user_id' => ['except' => null],
+        'success' => ['except' => ''],
+        'retried_with_refresh' => ['except' => ''],
+        'user_id' => ['except' => 0],
         'request_source' => ['except' => ''],
         'request_type' => ['except' => ''],
         'created_after' => ['except' => ''],
@@ -108,9 +108,9 @@ class EsbLogIndex extends Component
     {
         $this->search = '';
         $this->method = '';
-        $this->success = null;
-        $this->retried_with_refresh = null;
-        $this->user_id = null;
+        $this->success = '';
+        $this->retried_with_refresh = '';
+        $this->user_id = 0;
         $this->request_source = '';
         $this->request_type = '';
         $this->created_after = '';
