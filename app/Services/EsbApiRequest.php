@@ -21,7 +21,12 @@ class EsbApiRequest
         $this->auth->authenticateIfNeeded();
 
         if (!$this->auth->getAccessToken()) {
-            throw new Exception('Not authenticated. Call authenticate() first.');
+
+            if (!config('app.debug')) {
+                return false;
+            } else {
+                throw new Exception('Not authenticated. Call authenticate() first.');
+            }
         }
 
         $url = rtrim($this->auth->getApiUrl(), '/') . $path;
@@ -124,7 +129,13 @@ class EsbApiRequest
 
         if (curl_errno($ch)) {
             curl_close($ch);
-            throw new Exception('cURL Error: ' . curl_error($ch));
+
+            if (!config('app.debug')) {
+                session()->flash('error', 'cURL Error: ' . curl_error($ch));
+                return false;
+            } else {
+                throw new Exception('cURL Error: ' . curl_error($ch));
+            }
         }
 
         curl_close($ch);

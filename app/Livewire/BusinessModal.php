@@ -62,7 +62,6 @@ class BusinessModal extends Component
         $this->minimum_order = $this->business->minimum_order ?? 0;
 
         // force a component refresh so the select picks up the loaded options
-        $this->dispatch('$refresh');
         $this->dispatch('modal-show', name: 'business-modal');
         // dd($this->business);
         // dd($this->set_category_id);
@@ -94,7 +93,7 @@ class BusinessModal extends Component
 
             $this->resetForm();
             $this->dispatch('modal-close', name: 'business-modal');
-            $this->redirect(route('business.index'));
+            $this->dispatch('refreshBusinessList');
             // dd($business);
         } catch (\Throwable $th) {
             DB::rollBack();

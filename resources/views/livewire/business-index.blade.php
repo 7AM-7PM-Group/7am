@@ -65,6 +65,30 @@
                             <flux:button variant="primary" wire:click='openDetailModal({{ $item->id }})'
                                 icon="eye" size="sm"></flux:button>
                         </flux:tooltip>
+                        @if ($item->status == 'approved' && $item->esbCustomerId)
+                            <flux:tooltip content="Update Customer in ESB">
+                                <flux:button color="orange" variant="primary"
+                                    wire:click='updateCustomerInESB({{ $item->id }})' icon="cloud-backup"
+                                    size="sm"></flux:button>
+                            </flux:tooltip>
+                            <flux:tooltip content="Update Customer from ESB">
+                                <flux:button color="blue" variant="primary"
+                                    wire:click='updateCustomerFromESB({{ $item->id }})' icon="cloud-download"
+                                    size="sm"></flux:button>
+                            </flux:tooltip>
+                        @elseif($item->status == 'approved' && !$item->esbCustomerId)
+                            <flux:tooltip content="Import Customer to ESB">
+                                <flux:button color="orange" variant="primary"
+                                    wire:click='importCustomerToESB({{ $item->id }})' icon="cloud-upload"
+                                    size="sm"></flux:button>
+                            </flux:tooltip>
+                            <flux:tooltip content="Sync Customer from ESB">
+                                <flux:button color="blue" variant="primary"
+                                    wire:click='syncCustomerFromESB({{ $item->id }})' icon="cloud-sync"
+                                    size="sm"></flux:button>
+                            </flux:tooltip>
+                        @endif
+
                     </div>
                 </div>
             @endforeach
@@ -141,4 +165,5 @@
     </flux:container-sidebar>
 
     @livewire('business-modal')
+    @livewire('business-sync-from-esb')
 </div>

@@ -3,18 +3,22 @@
 namespace App\Livewire;
 
 use App\Models\Category;
+use App\Services\EsbApiAuth;
+use App\Services\EsbApiRequest;
+use App\Services\EsbApiRequest\CategoryRequest;
 use App\Services\JurnalApi;
 use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class CategoryIndex extends Component
 {
-
     public $categories;
-    protected $jurnalApi;
+    protected $request;
 
-    public function mount()
+    public function mount(EsbApiAuth $auth)
     {
+        $this->request = new CategoryRequest(new EsbApiRequest($auth));
+
         $this->getCategory();
     }
 

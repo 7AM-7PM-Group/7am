@@ -23845,13 +23845,6 @@ namespace Illuminate\Testing {
             }
     }
 
-namespace App\Livewire {
-    /**
-     */
-    class EsbLogIndex extends \Livewire\Component {
-            }
-    }
-
 
 namespace  {
     class App extends \Illuminate\Support\Facades\App {}
