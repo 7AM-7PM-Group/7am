@@ -43,9 +43,9 @@ class Product extends Model
         return $this->hasMany(Cart::class);
     }
 
-    public function category()
+    public function subCategory()
     {
-        return $this->belongsTo(Category::class, 'category_id', 'jurnal_id');
+        return $this->belongsTo(SubCategory::class);
     }
 
     public function links()

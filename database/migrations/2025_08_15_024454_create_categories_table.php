@@ -13,9 +13,12 @@ return new class extends Migration
     {
         Schema::create('categories', function (Blueprint $table) {
             $table->id();
-            $table->string('name');
-            $table->string('jurnal_id')->unique();
+            $table->string('categoryName');
+            $table->integer('categoryID')->unique();
+            $table->integer('categoryTypeID')->nullable();
             $table->string('slug');
+            $table->string('categoryTypeName')->nullable();
+            $table->string('notes')->nullable();
             $table->boolean('active')->default(false);
             $table->timestamps();
         });

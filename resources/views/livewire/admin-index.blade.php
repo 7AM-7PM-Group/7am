@@ -1,4 +1,3 @@
--- Active: 1764369064570@@127.0.0.1@3306
 <div class="space-y-4">
     <flux:session>{{ $title }}</flux:session>
     <flux:container-sidebar class="">

@@ -13,8 +13,8 @@ return new class extends Migration {
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->string('category_id')->nullable(); // Changed to string to store jurnal_id
-            $table->string('jurnal_id')->unique();
+            $table->integer('category_id')->nullable(); // Changed to string to store jurnal_id
+            $table->string('productID')->unique();
             $table->string('product_code');
             $table->string('name');
             $table->string('slug')->unique();
@@ -29,7 +29,7 @@ return new class extends Migration {
 
             // Foreign key → categories.jurnal_id
             $table->foreign('category_id')
-                ->references('jurnal_id')
+                ->references('categoryID')
                 ->on('categories')
                 ->onUpdate('cascade')
                 ->onDelete('set null');

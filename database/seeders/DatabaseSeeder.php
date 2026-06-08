@@ -52,9 +52,6 @@ class DatabaseSeeder extends Seeder
         ]);
 
 
-
-
-
         // foreach (range(1, 3) as $key => $item) {
         //     Category::factory(1)->create(['name' => "cat$item"]);
         // }
