@@ -2,6 +2,7 @@
 
 namespace App\Livewire;
 
+use App\Models\Category;
 use App\Models\Product;
 use App\Models\SetCategory;
 use App\Models\Setting;
@@ -33,10 +34,10 @@ class ShopIndex extends Component
             // dd(true, $this->categories);
         } else {
             // Jika tidak, gunakan set category default dari setting
-            $defaultSetCategoryId = Setting::where('key', 'default_set_category')->value('value');
-            $defaultSetCategory = SetCategory::find($defaultSetCategoryId);
+            // $defaultSetCategoryId = Setting::where('key', 'default_set_category')->value('value');
+            // $defaultSetCategory = SetCategory::find($defaultSetCategoryId);
 
-            $this->categories = $defaultSetCategory->categories ?? collect();
+            $this->categories = Category::all() ?? collect();
             // dd(false, $this->categories, $defaultSetCategory);
         }
 
@@ -66,17 +67,17 @@ class ShopIndex extends Component
     {
         // Ambil set_category terbaru langsung dari DB (menghindari relasi Auth yang stale)
         $setCategoryId = null;
-        if (Auth::check()) {
-            $setCategoryId = \App\Models\Business::where('user_id', Auth::id())
-                ->whereNotNull('set_category_id')
-                ->value('set_category_id');
-        }
+        // if (Auth::check()) {
+        //     $setCategoryId = \App\Models\Business::where('user_id', Auth::id())
+        //         ->whereNotNull('set_category_id')
+        //         ->value('set_category_id');
+        // }
 
-        if (!$setCategoryId) {
-            $setCategoryId = Setting::where('key', 'default_set_category')->value('value');
-        }
+        // if (!$setCategoryId) {
+        //     $setCategoryId = Setting::where('key', 'default_set_category')->value('value');
+        // }
         // Perbarui daftar kategori berdasarkan set_category yang aktif
-        $this->categories = SetCategory::find($setCategoryId)?->categories ?? collect();
+        // $this->categories = SetCategory::find($setCategoryId)?->categories ?? collect();
 
         $products = Product::filters([
             'search' => $this->search,

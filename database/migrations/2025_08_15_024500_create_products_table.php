@@ -1,6 +1,7 @@
 <?php
 
 use App\Models\Category;
+use App\Models\SubCategory;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,10 +14,11 @@ return new class extends Migration {
     {
         Schema::create('products', function (Blueprint $table) {
             $table->id();
-            $table->integer('category_id')->nullable(); // Changed to string to store jurnal_id
-            $table->string('productID')->unique();
-            $table->string('product_code');
-            $table->string('name');
+            $table->foreignIdFor(Category::class)->constrained();
+            $table->foreignIdFor(SubCategory::class)->constrained();
+            $table->unsignedBigInteger('productID')->unique();
+            $table->string('productCode');
+            $table->string('productName');
             $table->string('slug')->unique();
             $table->string('image')->nullable();
             $table->text('description');
@@ -26,13 +28,6 @@ return new class extends Migration {
             $table->boolean('active')->default(true);
             $table->softDeletes();
             $table->timestamps();
-
-            // Foreign key → categories.jurnal_id
-            $table->foreign('category_id')
-                ->references('categoryID')
-                ->on('categories')
-                ->onUpdate('cascade')
-                ->onDelete('set null');
         });
     }
 

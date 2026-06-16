@@ -49,14 +49,15 @@
                     <flux:navlist.item :href="route('business.index')" :current="request()->routeIs('business.index')"
                         wire:navigate>{{ __('Businessess') }}
                     </flux:navlist.item>
-                    <flux:navlist.item :href="route('set-category.index')"
-                        :current="request()->routeIs('set-category.index')" wire:navigate>{{ __('Set Categories') }}
-                    </flux:navlist.item>
+
                     <flux:navlist.item :href="route('category.index')" :current="request()->routeIs('category.index')"
                         wire:navigate>{{ __('Categories') }}
                     </flux:navlist.item>
                     <flux:navlist.item :href="route('product.index')" :current="request()->routeIs('product.index')"
                         wire:navigate>{{ __('Products') }}
+                    </flux:navlist.item>
+                    <flux:navlist.item :href="route('pricelist.index')"
+                        :current="request()->routeIs('pricelist.index')" wire:navigate>{{ __('Pricelists') }}
                     </flux:navlist.item>
                     <flux:navlist.item :href="route('minimum-order.index')"
                         :current="request()->routeIs('minimum-order.index')" wire:navigate>

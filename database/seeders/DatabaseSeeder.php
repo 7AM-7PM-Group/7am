@@ -38,28 +38,11 @@ class DatabaseSeeder extends Seeder
         // User::factory(10)->create();
         $this->call(SettingSeeder::class);
 
+        // Menggunakan UserSeeder yang sudah ada untuk membuat Admin, Sales, dan Customers
+        $this->call(UserSeeder::class);
 
-        foreach (range(1, 10) as $key => $item) {
-            // $user = User::factory()->create(['business' => 'requested', 'email' => "user{$item}@admin.com"]);
-
-            // Business::factory()->recycle($user)->create();
-        }
-
-        $user = User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'admin@admin.com',
-            'role' => 'admin'
-        ]);
-
-
-        // foreach (range(1, 3) as $key => $item) {
-        //     Category::factory(1)->create(['name' => "cat$item"]);
-        // }
-        // foreach (range(1, 40) as $key => $item) {
-        //     Product::factory(1)->recycle(Category::all())->create(['name' => "product $item"]);
-        // }
-
-        // Cart::factory(3)->recycle([$user, Product::all()])->create();
+        // Menggunakan BusinessSeeder yang sudah ada untuk membuat data bisnis bagi para customer
+        $this->call(BusinessSeeder::class);
 
         $this->call(NewsletterSeeder::class);
         $this->call(CouponSeeder::class);
@@ -93,7 +76,7 @@ class DatabaseSeeder extends Seeder
             $district = District::where('regency_id', $regency->id)->inRandomOrder()->first();
             $village = Village::where('district_id', $district->id)->inRandomOrder()->first();
 
-            Address::factory()->recycle([$user])->create([
+            Address::factory()->recycle(User::all())->create([
                 'regency_id' => $regency->id,
                 'district_id' => $district->id,
                 'village_id' => $village->id
@@ -102,17 +85,11 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RedeemPointSeeder::class);
 
-        $this->call(CategorySeeder::class);
-        $this->call(SetCategorySeeder::class);
-        $this->call(ProductSeeder::class);
+        // $this->call(CategorySeeder::class);
+        // $this->call(ProductSeeder::class);
+        $this->call(PricelistSeeder::class);
+        // $this->call(CustomerPricelistSeeder::class);
 
-        // Cart::factory(3)->recycle([$user, Product::all()])->create();
-
-        // Business::factory()->recycle($user)->create([
-        //     'status' => "approved",
-        //     'set_category_id' => 1
-        // ]);
-
-        $this->call(TransactionSeeder::class);
+        // $this->call(TransactionSeeder::class);
     }
 }

@@ -14,10 +14,10 @@ return new class extends Migration
     {
         Schema::create('sub_categories', function (Blueprint $table) {
             $table->id();
+            $table->string('subCategoryID')->unique();
             $table->string('subCategoryName');
             $table->string('slug')->unique();
-            $table->foreignIdFor(Category::class)->constrained()->cascadeOnDelete();
-            $table->string('subCategoryID')->unique();
+            $table->text('notes')->nullable();
             $table->timestamps();
         });
     }

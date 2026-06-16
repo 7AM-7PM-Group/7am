@@ -4,22 +4,25 @@ namespace App\Services;
 
 use Exception;
 use Illuminate\Support\Facades\Cache;
-use App\Services\EsbApiRequestLog;
 
 class EsbApiAuth
 {
     private $username;
+
     private $password;
+
     private $apiUrl;
+
     private EsbApiRequestLog $requestLog;
 
     private const ACCESS_TOKEN_BUFFER_SECONDS = 300;
+
     private const REFRESH_TOKEN_BUFFER_SECONDS = 3600;
 
     // Key untuk Cache agar tidak bentrok antar user jika diperlukan
     private const CACHE_KEY_PREFIX = 'esb_api_tokens_';
 
-    public function __construct($username, $password, $baseUrl = null, $environment = 'sandbox')
+    public function __construct($username, $password, $environment = 'sandbox')
     {
         $this->username = $username;
         $this->password = $password;
@@ -29,7 +32,7 @@ class EsbApiAuth
                 ? 'https://services.esb.co.id/core'
                 : 'https://stg7.esb.co.id/core-stg');
 
-        $this->requestLog = new EsbApiRequestLog();
+        $this->requestLog = new EsbApiRequestLog;
     }
 
     public function getApiUrl()
@@ -39,41 +42,41 @@ class EsbApiAuth
 
     public function getAccessToken()
     {
-        return Cache::get(self::CACHE_KEY_PREFIX . 'access_token');
+        return Cache::get(self::CACHE_KEY_PREFIX.'access_token');
     }
 
     public function getRefreshToken()
     {
-        return Cache::get(self::CACHE_KEY_PREFIX . 'refresh_token');
+        return Cache::get(self::CACHE_KEY_PREFIX.'refresh_token');
     }
 
     public function setAccessToken($token)
     {
-        Cache::put(self::CACHE_KEY_PREFIX . 'access_token', $token, now()->addHour());
+        Cache::put(self::CACHE_KEY_PREFIX.'access_token', $token, now()->addHour());
     }
 
     public function setRefreshToken($token)
     {
-        Cache::put(self::CACHE_KEY_PREFIX . 'refresh_token', $token, now()->addDays(30));
+        Cache::put(self::CACHE_KEY_PREFIX.'refresh_token', $token, now()->addDays(30));
     }
 
     public function isAccessTokenValid()
     {
         $token = $this->getAccessToken();
-        $expiry = Cache::get(self::CACHE_KEY_PREFIX . 'access_token_expires_at');
+        $expiry = Cache::get(self::CACHE_KEY_PREFIX.'access_token_expires_at');
 
-        return !empty($token)
-            && !empty($expiry)
+        return ! empty($token)
+            && ! empty($expiry)
             && $expiry > time() + self::ACCESS_TOKEN_BUFFER_SECONDS;
     }
 
     public function isRefreshTokenValid()
     {
         $token = $this->getRefreshToken();
-        $expiry = Cache::get(self::CACHE_KEY_PREFIX . 'refresh_token_expires_at');
+        $expiry = Cache::get(self::CACHE_KEY_PREFIX.'refresh_token_expires_at');
 
-        return !empty($token)
-            && !empty($expiry)
+        return ! empty($token)
+            && ! empty($expiry)
             && $expiry > time() + self::REFRESH_TOKEN_BUFFER_SECONDS;
     }
 
@@ -86,6 +89,7 @@ class EsbApiAuth
         if ($this->isRefreshTokenValid()) {
             try {
                 $this->refreshAccessToken();
+
                 return;
             } catch (Exception $e) {
             }
@@ -97,7 +101,7 @@ class EsbApiAuth
     public function authenticate()
     {
         $ch = curl_init();
-        $authUrl = $this->apiUrl . '/auth/login';
+        $authUrl = $this->apiUrl.'/auth/login';
 
         curl_setopt($ch, CURLOPT_URL, $authUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -122,7 +126,7 @@ class EsbApiAuth
 
         if (curl_errno($ch)) {
             curl_close($ch);
-            throw new Exception('cURL Error: ' . curl_error($ch));
+            throw new Exception('cURL Error: '.curl_error($ch));
         }
 
         curl_close($ch);
@@ -144,12 +148,12 @@ class EsbApiAuth
                 'error_message' => $errorDetail,
             ]);
 
+            if (! config('app.debug')) {
+                session()->flash('error', 'Authentication failed ('.$httpCode.'): '.$errorDetail);
 
-            if (!config('app.debug')) {
-                session()->flash('error', 'Authentication failed (' . $httpCode . '): ' . $errorDetail);
                 return false;
             } else {
-                throw new Exception('Authentication failed (' . $httpCode . '): ' . $errorDetail);
+                throw new Exception('Authentication failed ('.$httpCode.'): '.$errorDetail);
             }
         }
 
@@ -174,18 +178,17 @@ class EsbApiAuth
     public function refreshAccessToken()
     {
         $refreshToken = $this->getRefreshToken();
-        if (!$refreshToken) {
+        if (! $refreshToken) {
             throw new Exception('No refresh token available. Re-authenticate first.');
         }
 
         $ch = curl_init();
-        $refreshUrl = $this->apiUrl . '/auth/refresh';
+        $refreshUrl = $this->apiUrl.'/auth/refresh';
 
         curl_setopt($ch, CURLOPT_URL, $refreshUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
-
 
         $headers = [
             'Content-Type: application/json',
@@ -198,7 +201,7 @@ class EsbApiAuth
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
 
         if (curl_errno($ch)) {
-            $errorMessage = 'cURL Error: ' . curl_error($ch);
+            $errorMessage = 'cURL Error: '.curl_error($ch);
             curl_close($ch);
 
             $this->logAuthEvent([
@@ -214,7 +217,7 @@ class EsbApiAuth
                 'error_message' => $errorMessage,
             ]);
 
-            if (config("app.debug")) {
+            if (config('app.debug')) {
                 throw new Exception($errorMessage);
             }
 
@@ -239,11 +242,12 @@ class EsbApiAuth
                 'error_message' => $result['message'] ?? 'Token refresh failed',
             ]);
 
-            if (!config('app.debug')) {
-                session()->flash('error', 'Token refresh failed: ' . ($result['message'] ?? 'Unknown error'));
+            if (! config('app.debug')) {
+                session()->flash('error', 'Token refresh failed: '.($result['message'] ?? 'Unknown error'));
+
                 return false;
             } else {
-                throw new Exception('Token refresh failed: ' . ($result['message'] ?? 'Unknown error'));
+                throw new Exception('Token refresh failed: '.($result['message'] ?? 'Unknown error'));
             }
         }
 
@@ -268,14 +272,14 @@ class EsbApiAuth
     private function storeTokens(array $result)
     {
         if (isset($result['result']['accessToken'])) {
-            Cache::put(self::CACHE_KEY_PREFIX . 'access_token', $result['result']['accessToken'], now()->addDays(7));
+            Cache::put(self::CACHE_KEY_PREFIX.'access_token', $result['result']['accessToken'], now()->addDays(7));
             // Default expiry 1 jam jika tidak ada di response
-            Cache::put(self::CACHE_KEY_PREFIX . 'access_token_expires_at', time() + 3600, now()->addDays(7));
+            Cache::put(self::CACHE_KEY_PREFIX.'access_token_expires_at', time() + 3600, now()->addDays(7));
         }
 
         if (isset($result['result']['refreshToken'])) {
-            Cache::put(self::CACHE_KEY_PREFIX . 'refresh_token', $result['result']['refreshToken'], now()->addDays(30));
-            Cache::put(self::CACHE_KEY_PREFIX . 'refresh_token_expires_at', time() + 86400, now()->addDays(30));
+            Cache::put(self::CACHE_KEY_PREFIX.'refresh_token', $result['result']['refreshToken'], now()->addDays(30));
+            Cache::put(self::CACHE_KEY_PREFIX.'refresh_token_expires_at', time() + 86400, now()->addDays(30));
         }
     }
 

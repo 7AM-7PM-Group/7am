@@ -55,7 +55,7 @@
         unset($attributes['@cancel']);
     }
 
-    if ($dismissible === false) {
+    if ($dismissible ?? false) {
         $attributes = $attributes->merge(['disable-click-outside' => '']);
     }
 

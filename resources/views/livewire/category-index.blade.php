@@ -11,7 +11,6 @@
     </flux:session>
 
     <flux:container-sidebar>
-
         {{-- Header --}}
         <div class="flex gap-4 border-b min-w-lg w-full pb-3 text-sm font-semibold text-gray-500">
             <div class="w-10">#</div>
@@ -48,13 +47,6 @@
                             <div class="font-medium text-gray-800">
                                 {{ $item->categoryName }}
                             </div>
-
-                            @if ($item->subCategories->count())
-                                <div class="text-xs text-gray-400 mt-1">
-                                    {{ $item->subCategories->count() }}
-                                    subs
-                                </div>
-                            @endif
 
                         </div>
                         <div class="w-1/5 text-sm  text-gray-500">
@@ -96,68 +88,31 @@
                                 </flux:button>
                             @endif
 
-                            <flux:button wire:click="toggleOpen({{ $open != $item->id ? $item->id : 0 }})"
-                                icon="{{ $open != $item->id ? 'chevron-down' : 'chevron-up' }}" size="sm"
-                                variant="ghost" />
+
                         </div>
 
                     </div>
 
-                    {{-- Subcategories --}}
-                    @if ($open == $item->id)
-                        <div
-                            class="
-                                mt-4
-                                ml-8
-                                border-l
-                                pl-4
-                                space-y-2
-                            ">
-
-                            @foreach ($item->subCategories as $index => $sub)
-                                <div
-                                    class="
-                                        flex
-                                        items-center
-                                        justify-between
-                                        rounded-lg
-                                        bg-gray-50
-                                        px-4
-                                        py-2
-                                    ">
-
-                                    <div class="flex items-center gap-3">
-
-                                        <div
-                                            class="
-                                                text-xs
-                                                text-gray-400
-                                                w-5
-                                            ">
-                                            {{ $index + 1 }}
-                                        </div>
-
-                                        <div
-                                            class="
-                                                text-sm
-                                                text-gray-700
-                                            ">
-                                            {{ $sub->subCategoryName }}
-                                        </div>
-
-                                    </div>
-
-                                </div>
-                            @endforeach
-
-                        </div>
-                    @endif
-
                 </div>
             @endforeach
+        </div>
+    </flux:container-sidebar>
 
+    <flux:container-sidebar>
+        <div class="flex gap-4 border-b min-w-lg w-full pb-3 text-sm font-semibold text-gray-500">
+            <div class="w-10">#</div>
+            <div class="w-1/2">Sub Category Name</div>
+            <div class="w-1/2 text-center">Note</div>
         </div>
 
+        @foreach ($subCategories as $index => $sub)
+            <div class="flex gap-4 border-b py-3 min-w-lg w-full">
+                <div class="w-10">{{ $index + 1 }}</div>
+                <div class="w-1/2">{{ $sub->subCategoryName }}</div>
+                <div class="w-1/2 text-center">{{ $sub->note ?? '-' }}</div>
+            </div>
+        @endforeach
     </flux:container-sidebar>
+
 
 </div>

@@ -27,7 +27,8 @@ class BusinessFactory extends Factory
             'id_card' => 'id/card1.jpg',
             'representative' => fake()->name(),
             "phone" => fake()->phoneNumber(),
-            'user_id' => User::factory()
+            'user_id' => User::factory(),
+            'customerID' => mt_rand(100, 999)
         ];
     }
 }

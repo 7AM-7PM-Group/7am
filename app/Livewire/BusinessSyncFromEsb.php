@@ -19,14 +19,16 @@ class BusinessSyncFromEsb extends Component
 
     public $id, $business, $customerList = [];
 
-    public CustomerRequest $request;
-
     public $title = "";
 
-    public function mount(EsbApiAuth $auth)
+    public function mount()
     {
         $this->title = "Sync Customer from ESB";
-        $this->request = new CustomerRequest(new EsbApiRequest($auth));
+    }
+
+    protected function customerRequest(): CustomerRequest
+    {
+        return new CustomerRequest(new EsbApiRequest(app(EsbApiAuth::class)));
     }
 
     #[On("syncCustomerFromESB")]
@@ -34,9 +36,10 @@ class BusinessSyncFromEsb extends Component
     {
         $this->business = Business::find($id);
         $this->id = $id;
+        $this->name = $this->business?->name ?? '';
 
         $filters = ["limit" => 9999];
-        $response = $this->request->getCustomers($filters);
+        $response = $this->customerRequest()->getCustomers($filters);
 
         if (!$response) {
             if (config('app.debug')) {
@@ -47,7 +50,7 @@ class BusinessSyncFromEsb extends Component
         }
 
         if ($response['status'] === "ok") {
-            $this->customerList = collect($response['result']['data'])->pluck('customerName', 'customerID');
+            $this->customerList = collect($response['result']['data'])->pluck('customerName', 'customerID')->toArray();
         } else {
             if (config('app.debug')) {
                 throw new \Exception('Failed to fetch customers from ESB: ' . ($response['message'] ?? 'Unknown error'));
@@ -61,12 +64,12 @@ class BusinessSyncFromEsb extends Component
 
     public function save()
     {
-        if ($this->business->esbCustomerId) {
+        if ($this->business->customerID) {
             session()->flash('error', 'Customer Sudah Sync dengan dengan ESB.');
             return;
         }
 
-        $response = $this->request->getCustomer($this->customerID);
+        $response = $this->customerRequest()->getCustomer($this->customerID);
 
         if (!$response) {
             return;
@@ -82,7 +85,7 @@ class BusinessSyncFromEsb extends Component
 
         $this->business->update(
             [
-                'esbCustomerId' => $response['result']['customerID'],
+                'customerID' => $response['result']['customerID'],
                 'name' => $response['result']['customerName']
             ]
         );

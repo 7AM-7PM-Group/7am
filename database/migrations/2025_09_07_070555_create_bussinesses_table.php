@@ -15,7 +15,7 @@ return new class extends Migration {
         Schema::create('bussinesses', function (Blueprint $table) {
             $table->id();
             $table->foreignIdFor(User::class)->constrained();
-            $table->foreignIdFor(SetCategory::class)->nullable()->constrained()->onUpdate('cascade')->onDelete('set null');
+            $table->unsignedBigInteger('customerID')->unique()->nullable();
             $table->string('name');
             $table->text('address');
             $table->string('npwp');
@@ -36,6 +36,6 @@ return new class extends Migration {
      */
     public function down(): void
     {
-        Schema::dropIfExists('Businesses');
+        Schema::dropIfExists('businesses');
     }
 };

@@ -5,9 +5,9 @@ namespace Database\Factories;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\SetCategory>
+ * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Pricelist>
  */
-class SetCategoryFactory extends Factory
+class PricelistFactory extends Factory
 {
     /**
      * Define the model's default state.
@@ -17,7 +17,8 @@ class SetCategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->sentence(),
+            'name' => fake()->sentence(2),
+            'PricelistID' => 1
         ];
     }
 }

@@ -14,8 +14,8 @@ class BusinessSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->count(10)->create()->each(function ($user) {
-            $user->Businesses()->save(Business::factory()->make());
+        User::where('role', 'customer')->take(5)->get()->each(function ($user) {
+            Business::factory()->create(['user_id' => $user->id]);
         });
     }
 }

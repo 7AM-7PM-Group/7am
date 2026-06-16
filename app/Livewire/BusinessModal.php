@@ -11,7 +11,7 @@ use Livewire\Attributes\Validate;
 
 class BusinessModal extends Component
 {
-    public $title = "All Registered Business", $business, $setCategory = [];
+    public $title = "All Registered Business", $business;
     public $id = null;
     protected $paginationTheme = 'tailwind';
 
@@ -19,27 +19,17 @@ class BusinessModal extends Component
     public $status = '';
 
     #[Validate('required_if:status,approved')]
-    public $name = '', $set_category_id = '', $tenor = 0, $minimum_order = 0;
+    public $name = '', $tenor = 0, $minimum_order = 0;
 
     protected $listeners = [
         'openCreateBusinessModal' => 'openCreateBusinessModal',
         'openEditBusinessModal' => 'openEditBusinessModal'
     ];
 
-    public function rules()
-    {
-        return [
-            'name' => 'nullable|string|max:100',
-            'status' => 'nullable|string|max:50',
-            'set_category_id' => 'nullable|exists:set_categories,id',
-            'tenor' => 'nullable|integer',
-        ];
-    }
-
     private function resetForm()
     {
         $this->resetValidation();
-        $this->reset(['id', 'business', 'setCategory', 'status', 'name', 'set_category_id', 'tenor']);
+        $this->reset(['id', 'business', 'status', 'name', 'tenor']);
     }
 
     // public function openCreateBusinessModal()
@@ -52,12 +42,10 @@ class BusinessModal extends Component
     {
         $this->resetValidation();
         $this->business = Business::find($id);
-        $this->setCategory = SetCategory::all();
         $this->id = $this->business->id;
         $this->name = $this->business->name;
         $this->status = $this->business->status == 'requested' ? 'approved' : $this->business->status;
         // cast to int so the bound value type matches the option values
-        $this->set_category_id = $this->business->set_category_id !== null ? (int) $this->business->set_category_id : '';
         $this->tenor = $this->business->tenor ?? 0;
         $this->minimum_order = $this->business->minimum_order ?? 0;
 

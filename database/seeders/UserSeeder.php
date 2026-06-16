@@ -14,6 +14,12 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
+        User::factory()->create([
+            'name' => 'Test User',
+            'email' => 'admin@admin.com',
+            'role' => 'admin',
+        ]);
+
         foreach (range(1, 5) as $key => $value) {
             $user = User::factory()->create([
                 'email' => "customer{$value}@admin.com",

@@ -68,7 +68,6 @@ Route::prefix('b2b')->middleware(['auth', 'verified', 'sales-admin'])->group(fun
     Volt::route('coupons/add', 'coupon-create')->name('coupon.create');
     Volt::route('coupons/{slug}/edit', 'coupon-create')->name('coupon.edit');
 
-    Volt::route('set-categories', 'set-category-index')->name('set-category.index');
     Volt::route('minimum-orders', 'minimum-order-index')->name('minimum-order.index');
 
     Volt::route('categories', 'category-index')->name('category.index');
@@ -76,6 +75,8 @@ Route::prefix('b2b')->middleware(['auth', 'verified', 'sales-admin'])->group(fun
     Volt::route('businesses', 'business-index')->name('business.index');
 
     Volt::route('transaction', 'transaction-index')->name('transaction.index');
+
+    Volt::route('pricelists', 'pricelist-index')->name('pricelist.index');
 });
 
 

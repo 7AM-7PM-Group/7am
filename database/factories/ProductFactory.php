@@ -3,8 +3,9 @@
 namespace Database\Factories;
 
 use App\Models\Category;
-use App\Models\Product;
+use App\Models\SubCategory;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use Illuminate\Support\Str;
 
 /**
  * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Product>
@@ -18,17 +19,24 @@ class ProductFactory extends Factory
      */
     public function definition(): array
     {
-
-        $image = mt_rand(1, 10) < 2 ? 'product/product1.jpg' : 'product/product2.jpg';
+        $productName = fake()->unique()->words(3, true);
+        $productCode = fake()->unique()->bothify('PRD-####');
 
         return [
-            'name' => fake()->sentence(3, false),
-            'sku' => Product::skuNumberGenerator(),
-            'price' => mt_rand(1, 25),
-            'description' => fake()->paragraph(),
             'category_id' => Category::factory(),
+            'sub_category_id' => SubCategory::factory(),
+            'productID' => mt_rand(100, 999),
+            'productCode' => $productCode,
+            'productName' => Str::title($productName),
+            'image' => fake()->optional()->randomElement([
+                'product/product1.jpg',
+                'product/product2.jpg',
+            ]),
+            'description' => fake()->paragraph(),
+            'price' => fake()->numberBetween(100, 250) * 1000,
+            'unit' => fake()->randomElement(['pcs', 'box', 'pack', 'kg']),
             'moq' => 1,
-            'image' => $image,
+            'active' => true,
         ];
     }
 }

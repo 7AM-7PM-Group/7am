@@ -2,34 +2,34 @@
 
 namespace App\Services;
 
-use App\Services\EsbApiAuth;
 use Exception;
 
 class EsbApiRequest
 {
     protected EsbApiAuth $auth;
+
     protected EsbApiRequestLog $log;
 
     public function __construct(EsbApiAuth $auth)
     {
         $this->auth = $auth;
-        $this->log = new EsbApiRequestLog();
+        $this->log = new EsbApiRequestLog;
     }
 
-    public function request($method, $path, $body = null, array $logContext = [])
+    public function request($method, $path, $body = null, $baseUrl = 'core', array $logContext = [])
     {
         $this->auth->authenticateIfNeeded();
 
-        if (!$this->auth->getAccessToken()) {
+        if (! $this->auth->getAccessToken()) {
 
-            if (!config('app.debug')) {
+            if (! config('app.debug')) {
                 return false;
             } else {
                 throw new Exception('Not authenticated. Call authenticate() first.');
             }
         }
 
-        $url = rtrim($this->auth->getApiUrl(), '/') . $path;
+        $url = rtrim($this->auth->getApiUrl($baseUrl), '/').$path;
         $retried = false;
 
         try {
@@ -82,22 +82,22 @@ class EsbApiRequest
 
     public function get($path, array $logContext = [])
     {
-        return $this->request('GET', $path, null, $logContext);
+        return $this->request('GET', $path, null, 'core', $logContext);
     }
 
     public function post($path, $body = [], array $logContext = [])
     {
-        return $this->request('POST', $path, $body, $logContext);
+        return $this->request('POST', $path, $body, 'core', $logContext);
     }
 
     public function put($path, $body = [], array $logContext = [])
     {
-        return $this->request('PUT', $path, $body, $logContext);
+        return $this->request('PUT', $path, $body, 'core', $logContext);
     }
 
     public function delete($path, array $logContext = [])
     {
-        return $this->request('DELETE', $path, null, $logContext);
+        return $this->request('DELETE', $path, null, 'core', $logContext);
     }
 
     protected function executeRequest($method, $url, $body = null)
@@ -111,15 +111,15 @@ class EsbApiRequest
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
 
         $headers = [
-            'Authorization: Bearer ' . $this->auth->getAccessToken(),
+            'Authorization: Bearer '.$this->auth->getAccessToken(),
             'Accept: application/json',
             'Content-Type: application/json',
         ];
 
-        if (!empty($body)) {
+        if (! empty($body)) {
             $jsonBody = json_encode($body);
             curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonBody);
-            $headers[] = 'Content-Length: ' . strlen($jsonBody);
+            $headers[] = 'Content-Length: '.strlen($jsonBody);
         }
 
         curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
@@ -130,11 +130,12 @@ class EsbApiRequest
         if (curl_errno($ch)) {
             curl_close($ch);
 
-            if (!config('app.debug')) {
-                session()->flash('error', 'cURL Error: ' . curl_error($ch));
+            if (! config('app.debug')) {
+                session()->flash('error', 'cURL Error: '.curl_error($ch));
+
                 return false;
             } else {
-                throw new Exception('cURL Error: ' . curl_error($ch));
+                throw new Exception('cURL Error: '.curl_error($ch));
             }
         }
 

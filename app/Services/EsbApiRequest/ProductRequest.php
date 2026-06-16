@@ -24,6 +24,17 @@ class ProductRequest
         return $this->request->get($path);
     }
 
+    public function getMasterProducts(array $filters = [])
+    {
+        $path = '/corev1/master/product';
+
+        if (!empty($filters)) {
+            $path .= '?' . http_build_query($filters);
+        }
+
+        return $this->request->get($path);
+    }
+
     public function getProduct($id)
     {
         return $this->request->get("/product/{$id}");

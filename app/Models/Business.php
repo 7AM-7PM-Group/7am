@@ -21,9 +21,9 @@ class Business extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function setCategory()
+    public function pricelist()
     {
-        return $this->belongsTo(SetCategory::class);
+        return $this->hasMany(CustomerPricelist::class, 'customer_id', 'customerID');
     }
 
     public function scopeFilters(Builder $query, array $filters)

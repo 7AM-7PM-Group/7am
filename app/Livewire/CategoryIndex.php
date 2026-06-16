@@ -12,20 +12,24 @@ use Livewire\Component;
 
 class CategoryIndex extends Component
 {
-    public $categories;
+    public $categories, $subCategories;
 
-    public $title = "Categories";
-
-    public $open = 0;
+    public $title = "Categories / Sub Categories";
 
     public function mount()
     {
         $this->getCategory();
+        $this->getSubCategories();
     }
 
     public function getCategory()
     {
         $this->categories = Category::all();
+    }
+
+    public function getSubCategories()
+    {
+        $this->subCategories = SubCategory::all();
     }
 
     public function toggleStatus($id)
@@ -47,6 +51,7 @@ class CategoryIndex extends Component
 
         session()->flash('success', "Category and Subcategory success synced");
         $this->getCategory();
+        $this->getSubCategories();
     }
 
     public function syncCategories(EsbApiAuth $auth)
@@ -57,7 +62,9 @@ class CategoryIndex extends Component
 
         $response = $request->getCategories($filters);
 
-        if (!$response || $response['httpCode'] > 400 || $response['status'] === "fail") {
+        // dd($response);
+
+        if (!$response || $response['status'] === "fail") {
             if (config('app.debug')) {
                 throw new \Exception($response['message'] ?? '');
             }
@@ -67,13 +74,16 @@ class CategoryIndex extends Component
 
         $result = $response['result']['data'];
 
-        Category::updateOrCreate(
-            ['categoryID' => $result['categoryID']],
-            $result
-        );
+        foreach ($result as $key => $item) {
+            Category::updateOrCreate(
+                ['categoryID' => $item['categoryID']],
+                $item
+            );
+        }
 
         return 1;
     }
+
     public function syncSubCategories(EsbApiAuth $auth)
     {
         $request = new SubCategoryRequest(new EsbApiRequest($auth));
@@ -82,7 +92,7 @@ class CategoryIndex extends Component
 
         $response = $request->getSubCategories($filters);
 
-        if (!$response || $response['httpCode'] > 400 || $response['status'] === "fail") {
+        if (!$response ||  $response['status'] === "fail") {
             if (config('app.debug')) {
                 throw new \Exception($response['message'] ?? '');
             }
@@ -92,17 +102,15 @@ class CategoryIndex extends Component
 
         $result = $response['result']['data'];
 
-        SubCategory::updateOrCreate(
-            ['subCategoryID' => $result['subCategoryID']],
-            $result
-        );
+        foreach ($result as $key => $item) {
+
+            SubCategory::updateOrCreate(
+                ['subCategoryID' => $item['subCategoryID']],
+                $item
+            );
+        }
 
         return 1;
-    }
-
-    public function toggleOpen($id)
-    {
-        $this->open = $id;
     }
 
     public function render()

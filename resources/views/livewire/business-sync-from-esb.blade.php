@@ -8,8 +8,8 @@
         <flux:separator></flux:separator>
         <div class="mt-4">
             <flux:select wire:model='customerID' label="Select Customer on ESB">
-                @foreach ($customerList as $customer)
-                    <flux:select.option value="{{ $customer->customerID }}">{{ $customer->customerName }}
+                @foreach ($customerList as $customerID => $customerName)
+                    <flux:select.option value="{{ $customerID }}">{{ $customerName }}
                     </flux:select.option>
                 @endforeach
             </flux:select>

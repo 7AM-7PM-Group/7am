@@ -15,7 +15,7 @@ use Livewire\Component;
 
 class BusinessIndex extends Component
 {
-    public $title = "All Registered Business", $business, $businesses,  $setCategory;
+    public $title = "Customers", $business, $businesses;
 
     #[Validate('required')]
     public $status = '';
@@ -26,8 +26,6 @@ class BusinessIndex extends Component
     #[Url(except: '')]
     public $sts = '';
 
-
-
     #[Validate('required_if:status,accepted')]
     public $name = '', $set_category_id;
 
@@ -35,7 +33,6 @@ class BusinessIndex extends Component
     {
         $this->getBusiness();
         // $this->request(1, 'rejected');
-        $this->setCategory = SetCategory::all();
     }
 
     public function openDetailModal($id)
@@ -145,7 +142,7 @@ class BusinessIndex extends Component
         }
 
         if ($response['status'] === "ok") {
-            $business->update(['esbCustomerId' => $response['result']['customerID']]);
+            $business->update(['customerID' => $response['result']['customerID']]);
             session()->flash('success', 'Customer imported successfully!');
         } else {
             session()->flash('error', 'Failed to import customer.');
@@ -160,8 +157,6 @@ class BusinessIndex extends Component
 
     public function render()
     {
-        // $bisnis = $this->businesses->paginate(24);
-        // dd($bisnis->user);
         return view('livewire.business-index')->layout('components.layouts.app', ['title' => $this->title]);
     }
 }

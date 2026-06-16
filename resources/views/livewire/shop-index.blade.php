@@ -53,7 +53,8 @@
                                 <div class="flex justify-between items-center mb-2">
                                     <p class="font-semibold text-md text-left">{{ $item->name }}</p>
                                 </div>
-                                <p class="text-[#D4A373] text-left">Rp. {{ number_format($item->price, 0, ',', '.') }}
+                                <p class="text-[#D4A373] text-left">Rp.
+                                    {{ number_format($item->display_price, 0, ',', '.') }}
                                 </p>
                             </div>
                         </button>

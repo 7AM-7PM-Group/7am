@@ -12,12 +12,11 @@
         "php": "^8.2",
         "azishapidin/indoregion": "^3.0",
         "cviebrock/eloquent-sluggable": "^12.0",
-        "intervention/image": "^3.11",
+        "intervention/image": "3.11",
         "laravel/framework": "^12.0",
         "laravel/tinker": "^2.10.1",
         "livewire/flux": "^2.1.1",
         "livewire/volt": "^1.7.0",
-        "maatwebsite/excel": "^1.1",
         "midtrans/midtrans-php": "^2.6",
         "phpoffice/phpspreadsheet": "*"
     },

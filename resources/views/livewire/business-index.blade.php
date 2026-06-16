@@ -65,7 +65,7 @@
                             <flux:button variant="primary" wire:click='openDetailModal({{ $item->id }})'
                                 icon="eye" size="sm"></flux:button>
                         </flux:tooltip>
-                        @if ($item->status == 'approved' && $item->esbCustomerId)
+                        @if ($item->status == 'approved' && $item->customerID)
                             <flux:tooltip content="Update Customer in ESB">
                                 <flux:button color="orange" variant="primary"
                                     wire:click='updateCustomerInESB({{ $item->id }})' icon="cloud-backup"
@@ -76,7 +76,7 @@
                                     wire:click='updateCustomerFromESB({{ $item->id }})' icon="cloud-download"
                                     size="sm"></flux:button>
                             </flux:tooltip>
-                        @elseif($item->status == 'approved' && !$item->esbCustomerId)
+                        @elseif($item->status == 'approved' && !$item->customerID)
                             <flux:tooltip content="Import Customer to ESB">
                                 <flux:button color="orange" variant="primary"
                                     wire:click='importCustomerToESB({{ $item->id }})' icon="cloud-upload"
@@ -120,10 +120,6 @@
                     <div class="flex gap-4 text-start">
                         <div class="w-1/3">Registered Address</div>
                         <div class="w-2/3">: {{ $business?->address }}</div>
-                    </div>
-                    <div class="flex gap-4 text-start">
-                        <div class="w-1/3">Selected Category</div>
-                        <div class="w-2/3">: {{ $business?->setCategory?->name ?? '-' }}</div>
                     </div>
 
                     <flux:separator text="Bank Info"></flux:separator>

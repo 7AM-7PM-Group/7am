@@ -30,13 +30,8 @@ class SubCategory extends Model
 
     public $guarded = ['id'];
 
-    public function category(): BelongsTo
-    {
-        return $this->belongsTo(Category::class);
-    }
-
     public function products(): HasMany
     {
-        return $this->hasMany(Product::class);
+        return $this->hasMany(Product::class, 'sub_category_id', 'subCategoryID');
     }
 }

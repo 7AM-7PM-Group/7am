@@ -22,7 +22,7 @@ class AppServiceProvider extends ServiceProvider
         });
 
         $this->app->singleton(EsbApiAuth::class, function () {
-            return new EsbApiAuth(config('ESB.esb_username'), config('ESB.esb_password'), config('ESB.esb_base_url'), config('ESB.esb_environment'));
+            return new EsbApiAuth(config('ESB.esb_username'), config('ESB.esb_password'));
         });
     }
 

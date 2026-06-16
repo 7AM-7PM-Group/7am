@@ -37,22 +37,6 @@ class Category extends Model
 
     public function products()
     {
-        return $this->hasMany(Product::class, 'category_id', 'jurnal_id');
-    }
-
-    public function subCategories()
-    {
-        return $this->hasMany(SubCategory::class);
-    }
-
-    public function setCategories()
-    {
-        return $this->belongsToMany(
-            SetCategory::class,          // model tujuan
-            'set_category_items',        // tabel pivot
-            'category_id',               // FK dari Category
-            'set_category_id'            // FK dari SetCategory
-        )
-            ->select('set_categories.*'); // 👈 cegah konflik id
+        return $this->hasMany(Product::class, 'category_id', 'categoryID');
     }
 }

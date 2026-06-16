@@ -36,13 +36,6 @@
                 <div class="w-2/3">: {{ $business?->address }}</div>
             </div>
 
-            <flux:select label="Select Categories" wire:key="select-category-{{ $id }}" class="h-full"
-                placeholder="Select Category" required wire:model.live="set_category_id">
-                @foreach ($setCategory as $category)
-                    <flux:select.option value="{{ $category->id }}">{{ $category->name }}</flux:select.option>
-                @endforeach
-            </flux:select>
-
             <flux:separator text="Bank Info"></flux:separator>
             <div class="flex gap-4 text-start">
                 <div class="w-1/3">Bank</div>

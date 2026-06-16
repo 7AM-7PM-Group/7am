@@ -4,58 +4,69 @@
     <flux:container-sidebar>
         <div class="flex justify-between gap-4 ">
             <flux:input wire:model.live='search' placeholder='Search a Product' size='sm'></flux:input>
-            <flux:select wire:model.live='set_category' size="sm" placeholder="Set Category" class="w-48">
-                <option value="">All Set Categories</option>
-                @foreach ($set_categories as $set_category)
-                    <option value="{{ $set_category->id }}">{{ $set_category->name }}</option>
+
+            <flux:select wire:model.live='category' size="sm" placeholder="Category" class="w-48">
+                <flux:select.option value="">All Categories</flux:select.option>
+                @foreach ($categories as $category)
+                    <flux:select.option value="{{ $category->slug }}">{{ $category->categoryName }}</flux:select.option>
                 @endforeach
             </flux:select>
-            <flux:select wire:model.live='category' size="sm" placeholder="Category" class="w-48">
-                <option value="">All Categories</option>
-                @foreach ($categories as $category)
-                    <option value="{{ $category->slug }}">{{ $category->name }}</option>
+            <flux:select wire:model.live='sub_category' size="sm" placeholder="Sub Category" class="w-48">
+                <flux:select.option value="">All Sub Categories</flux:select.option>
+                @foreach ($subCategories as $sub)
+                    <flux:select.option value="{{ $sub->slug }}">{{ $sub->subCategoryName }}</flux:select.option>
                 @endforeach
             </flux:select>
             <flux:button variant="primary" wire:click='sync' icon="plus" size="sm">Sync</flux:button>
         </div>
 
-        <div class="grid grid-cols-14 min-w-4xl font-semibold py-2 mt-4 gap-4">
+        <div class="grid grid-cols-16 min-w-4xl font-semibold py-2 mt-4 gap-4">
             <div class="">#</div>
             <div class="col-span-3">Product</div>
-            <div class="col-span-2 text-center">SKU</div>
+            <div class="col-span-2 text-center">Code</div>
             <div class="col-span-2 text-center">Category</div>
-            <div class="col-span-2 text-center">Price</div>
+            <div class="col-span-2 text-center">Sub Category</div>
+            <div class="col-span-2 text-center">Base Price</div>
             <div class="col-span-2 text-center">MOQ</div>
             <div class="col-span-2 text-center">Action</div>
         </div>
         @foreach ($products as $key => $item)
-            <div class="grid grid-cols-14 items-center min-w-4xl py-1 gap-4">
+            <div class="grid grid-cols-16 items-center min-w-4xl py-1 gap-4">
                 <div class="">{{ $key + 1 }}</div>
                 <div class="col-span-3 grid grid-cols-4 items-center gap-2">
                     <div class="aspect-square rounded bg-center bg-cover bg-no-repeat"
-                        style="background-image: url({{ $item['image'] != '' ? $item['image'] : asset('assets/No-Picture-Found.png') }})">
+                        style="background-image: url({{ $item->image != '' ? asset('storage/' . $item->image) : asset('assets/No-Picture-Found.png') }})">
                     </div>
                     <div class="col-span-3">
-                        {{ $item['name'] }}
+                        {{ $item->productName }}
                     </div>
                 </div>
-                <div class="col-span-2 text-center">{{ $item['product_code'] }}</div>
-                <div class="col-span-2 text-center">{{ $item['category']['name'] }}</div>
-                <div class="col-span-2 text-center">Rp. {{ number_format($item['price'], 0, ',', '.') }}</div>
+                <div class="col-span-2 text-center">{{ $item->productCode }}</div>
+                <div class="col-span-2 text-center">{{ $item->category->categoryName }}</div>
+                <div class="col-span-2 text-center">{{ $item->subCategory->subCategoryName }}</div>
+                <div class="col-span-2 text-center">Rp. {{ number_format($item->price, 0, ',', '.') }}</div>
                 <div class="col-span-2 text-center">{{ $item['moq'] }}</div>
                 <div class="col-span-2 justify-center flex gap-2">
                     <flux:tooltip content="Set MOQ">
                         <flux:button size="sm" icon="pencil-square" variant="primary" color="amber"
-                            wire:click="setMOQ({{ $item['id'] }})"></flux:button>
+                            wire:click="openEditModal({{ $item['id'] }})"></flux:button>
                     </flux:tooltip>
                 </div>
             </div>
         @endforeach
 
 
-        <flux:modal name="set-moq">
-            <div class="mt-4">Adjust Information for {{ $name }}</div>
+        <flux:modal name="edit-product-modal">
+            <div class="mt-4">Edit Product</div>
             <form wire:submit='save'>
+                <div class="">
+                    <flux:input wire:key="product-img-{{ $productId }}" type="file" label="Image"
+                        wire:model.live='image' preview="{{ $preview }}">
+                    </flux:input>
+                </div>
+                <div class="">
+                    <flux:textarea wire:model.live='description' label="Description"></flux:textarea>
+                </div>
                 <div class="mt-4">
                     <flux:input wire:model.live='moq' label="Minimum Order Quantity" type="number"></flux:input>
                 </div>
