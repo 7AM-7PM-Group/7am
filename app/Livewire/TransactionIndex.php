@@ -2,20 +2,21 @@
 
 namespace App\Livewire;
 
+use App\Mail\Order\Cancel;
 use App\Models\Setting;
-use Livewire\Attributes\Url;
-use Livewire\Component;
 use App\Models\Transaction;
-use App\Models\TransactionItem;
+use App\Services\EsbApiAuth;
+use App\Services\EsbApiRequest;
+use App\Services\EsbApiRequest\TransactionRequest;
 use App\Services\JurnalApi;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Livewire\Attributes\On;
+use Livewire\Attributes\Url;
 use Livewire\Attributes\Validate;
-use PhpOffice\PhpSpreadsheet\IOFactory;
-use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
-use Symfony\Component\HttpFoundation\StreamedResponse;
+use Livewire\Component;
 
 class TransactionIndex extends Component
 {
@@ -34,7 +35,9 @@ class TransactionIndex extends Component
     #[Validate('required')]
     public $cancellation_reason = '';
 
-    public $transaction, $transaction_number = '';
+    public $transaction;
+
+    public $transaction_number = '';
 
     public function mount()
     {
@@ -56,59 +59,26 @@ class TransactionIndex extends Component
         $this->page = '';
     }
 
-    public function export()
-    {
-        // Ambil data dari DB
-        $items = TransactionItem::whereIn('transaction_id', $this->transactions->pluck('id'))
-            ->get();
-
-        // Load template
-        $templatePath = storage_path('app/public/SalesInvoiceImportTemplateMCTDA.xlsx');
-        $spreadsheet = IOFactory::load($templatePath);
-        $sheet = $spreadsheet->getActiveSheet();
-
-        $startRow = 2; // asumsi header di baris 1
-        $row = $startRow;
-
-        foreach ($items as $item) {
-            $sheet->setCellValue("A{$row}", $item->invoice_number);
-            $sheet->setCellValue("B{$row}", $item->date);
-            $sheet->setCellValue("C{$row}", $item->customer_name);
-            $sheet->setCellValue("D{$row}", $item->product_name);
-            $sheet->setCellValue("E{$row}", $item->qty);
-            $sheet->setCellValue("F{$row}", $item->price);
-            $sheet->setCellValue("G{$row}", $item->payment_method);
-            $sheet->setCellValue("H{$row}", $item->paid_amount);
-            $row++;
-        }
-
-        // Download file
-        $writer = new Xlsx($spreadsheet);
-        $fileName = 'Sales_Export_' . now()->format('Ymd_His') . '.xlsx';
-
-        return new StreamedResponse(function () use ($writer) {
-            $writer->save('php://output');
-        }, 200, [
-            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
-            'Content-Disposition' => "attachment; filename=\"$fileName\"",
-        ]);
-    }
-
-    public function importInvoice(JurnalApi $jurnalApi, $id)
+    public function importSalesOrderToESB($id)
     {
         try {
             DB::beginTransaction();
             $transaction = Transaction::where('id', $id)->first();
+            $business = $transaction->user->businesses;
+
+            $request = new TransactionRequest(new EsbApiRequest(app(EsbApiAuth::class)));
 
             // dd($transaction);
 
-            if (!$transaction) {
-                Session::flash('error', "Transaction not found");
+            if (! $transaction) {
+                Session::flash('error', 'Transaction not found');
+
                 return;
             }
 
             if ($transaction->mekari_sync_status != 'pending') {
                 Session::flash('error', "Transaction status are $transaction->mekari_sync_status");
+
                 return;
             }
 
@@ -121,67 +91,41 @@ class TransactionIndex extends Component
             }
 
             $body = [
-                "sales_invoice" => [
-                    "transaction_date" => $transaction->shipping_date->format('Y-m-d'),
-                    "transaction_lines_attributes" => [],
-                    "shipping_date" => $transaction->shipping_date->format('Y-m-d'),
-                    "shipping_price" => 0,
-                    "shipping_address" => $transaction->shipping->address,
-                    "is_shipped" => true,
-                    "ship_via" => "ship",
-                    "reference_no" =>  $transaction->transaction_number,
-                    "tracking_no" => $transaction->transaction_number,
-                    "address" => '',
-                    "term_name" => 'Cash on Delivery',
-                    "due_date" => $transaction->user->Businesses->tenor > 0 ? $transaction->shipping_date->addDays($transaction->user->Businesses->tenor)->format('Y-m-d') : $transaction->shipping_date->format('Y-m-d'),
-                    "deposit_to_name" => Setting::where('key', 'deposit_to_name')->value('value'),
-                    "deposit" => 0,
-                    "discount_unit" => $transaction->discount,
-                    "witholding_account_name" => Setting::where('key', 'witholding_account_name')->value('value'),
-                    "witholding_value" => (int) Setting::where('key', 'witholding_value')->value('value'),
-                    "witholding_type" => Setting::where('key', 'witholding_type')->value('value'),
-                    "discount_type_name" => "Value",
-                    "warehouse_name" => Setting::where('key', 'warehouse_name')->value('value'),
-                    "warehouse_code" => Setting::where('key', 'warehouse_code')->value('value'),
-                    "person_name" => $transaction->user->Businesses->name ?? "Toko 1",
-                    "tags" => [],
-                    "email" => $transaction->shipping->email,
-                    "transaction_no" => "",
-                    "message" => $memo,
-                    "memo" => $memo,
-                    "custom_id" => "",
-                    "source" => "Website B2B 7AM",
-                    "use_tax_inclusive" => Setting::where('key', 'use_tax_inclusive')->value('value') === 'true',
-                    "tax_after_discount" => Setting::where('key', 'tax_after_discount')->value('value') === 'true',
-                ],
+                'branchID' => 185,
+                'productSalesDate' => Carbon::now()->format('Y-m-d'),
+                'requiredDate' => Carbon::now()->addDays()->format('Y-m-d'),
+                'currencyID' => 1,
+                'rate' => 1,
+                'customerID' => $business->customerID,
+                'salesRepID' => null,
+                'customerBranchID' => null,
+                'linkPurchaseNum' => null,
+                'customerAddress' => $transaction->shipping->address,
+                'additionalInfo' => $transaction->shipping->type,
+
             ];
 
             foreach ($transaction->items as $key => $item) {
-                $body['sales_invoice']['transaction_lines_attributes'][] = [
-                    "quantity" => $item->qty,
-                    "rate" => $item->price,
-                    "discount" => 0,
-                    'product_id ' => $item->product->jurnal_id,
-                    "product_name" => $item->product->name,
-                    "line_tax_id" => (int) Setting::where('key', 'line_tax_id')->value('value'),
-                    "line_tax_name" => Setting::where('key', 'line_tax_name')->value('value')
+                $body['productSalesDetails'][] = [
+                    'productDetailID' => $item->product->productID,
+                    'qty' => $item->qty,
+                    'priceListPrice' => 0,
+                    'price' => $item->price,
+                    'discount' => 0,
+                    'discountPercent' => 0,
+                    'vatValue' => 0,
+                    'dppValue' => 0,
+                    'notes' => null,
                 ];
             }
 
-            $response = $jurnalApi->request(
-                'POST',
-                '/public/jurnal/api/v1/sales_invoices',
-                $body
-            );
-            // return response()->json($response);
-            // dd($response);
-            // dd($response['sales_invoice']['transaction_no']);
+            $response = $request->createTransaction($body);
 
-            if (!isset($response['sales_invoice'])) {
+            if (! isset($response['result'])) {
                 throw new \Exception(($response['error_full_messages'][0] ?? 'Unknown error'));
             }
 
-            $number = $response['sales_invoice']['transaction_no'];
+            $number = $response['result']['productSalesNum'];
 
             $transaction->update(['number' => $number, 'mekari_sync_status' => 'synced']);
             DB::commit();
@@ -189,7 +133,7 @@ class TransactionIndex extends Component
             session()->flash('success', "Invoice $number imported successfully.");
         } catch (\Throwable $th) {
             DB::rollBack();
-            session()->flash('error', "Transaction $transaction->transaction_number import failed: " . $th->getMessage());
+            session()->flash('error', "Transaction $transaction->transaction_number import failed: ".$th->getMessage());
             // if (config('app.debug', false)) throw $th;
         }
     }
@@ -198,8 +142,9 @@ class TransactionIndex extends Component
     {
         $transaction = Transaction::where('id', $id)->first();
 
-        if (!$transaction) {
-            session()->flash('error', "Transaction not found");
+        if (! $transaction) {
+            session()->flash('error', 'Transaction not found');
+
             return;
         }
 
@@ -213,12 +158,12 @@ class TransactionIndex extends Component
     {
         $transaction = $this->transaction;
 
-        if (!$transaction) {
-            session()->flash('error', "Transaction not found");
+        if (! $transaction) {
+            session()->flash('error', 'Transaction not found');
         }
 
         if ($transaction->status != 'ordered' || $transaction->mekari_sync_status != 'pending') {
-            session()->flash('error', "Your order cannot be cancelled");
+            session()->flash('error', 'Your order cannot be cancelled');
         }
         try {
             DB::beginTransaction();
@@ -232,12 +177,14 @@ class TransactionIndex extends Component
 
             DB::commit();
             $this->dispatch('modal-close', name: 'cancel-order');
-            Mail::to($transaction->user->email)->queue(new \App\Mail\Order\Cancel($transaction->slug));
+            Mail::to($transaction->user->email)->queue(new Cancel($transaction->slug));
 
-            session()->flash('success', "Order has been cancelled");
+            session()->flash('success', 'Order has been cancelled');
         } catch (\Throwable $th) {
             DB::rollBack();
-            if (config('app.debug', false)) throw $th;
+            if (config('app.debug', false)) {
+                throw $th;
+            }
             session()->flash('error', $th->getMessage());
         }
     }
@@ -247,32 +194,34 @@ class TransactionIndex extends Component
         try {
             DB::beginTransaction();
             $transaction = Transaction::where('id', $id)->first();
-            if (!$transaction) {
-                Session::flash('error', "Transaction not found");
+            if (! $transaction) {
+                Session::flash('error', 'Transaction not found');
+
                 return;
             }
             if ($transaction->payment->mekari_sync_status != 'pending') {
                 Session::flash('error', "Payment status are {$transaction->payment->mekari_sync_status}");
+
                 return;
             }
             $body = [
-                "receive_payment" => [
-                    "transaction_date" => $transaction->shipping_date->format('Y-m-d'),
-                    "records_attributes" => [
+                'receive_payment' => [
+                    'transaction_date' => $transaction->shipping_date->format('Y-m-d'),
+                    'records_attributes' => [
                         [
-                            "transaction_no" => $transaction->number,
-                            "amount" => $transaction->total,
+                            'transaction_no' => $transaction->number,
+                            'amount' => $transaction->total,
                         ],
                     ],
-                    "custom_id" => "ReceivePayment" . $transaction->number,
-                    "payment_method_name" => Setting::where('key', 'payment_method_name')->value('value'),
-                    "payment_method_id" => (int) Setting::where('key', 'payment_method_id')->value('value'),
-                    "is_draft" => false,
-                    "deposit_to_name" => Setting::where('key', 'payment_deposit_to_name')->value('value'),
-                    "memo" => "Payment order $transaction->number",
-                    "witholding_account_name" => Setting::where('key', 'payment_witholding_account_name')->value('value'),
-                    "witholding_value" => (int) Setting::where('key', 'payment_witholding_value')->value('value'),
-                    "witholding_type" => Setting::where('key', 'payment_witholding_type')->value('value'),
+                    'custom_id' => 'ReceivePayment'.$transaction->number,
+                    'payment_method_name' => Setting::where('key', 'payment_method_name')->value('value'),
+                    'payment_method_id' => (int) Setting::where('key', 'payment_method_id')->value('value'),
+                    'is_draft' => false,
+                    'deposit_to_name' => Setting::where('key', 'payment_deposit_to_name')->value('value'),
+                    'memo' => "Payment order $transaction->number",
+                    'witholding_account_name' => Setting::where('key', 'payment_witholding_account_name')->value('value'),
+                    'witholding_value' => (int) Setting::where('key', 'payment_witholding_value')->value('value'),
+                    'witholding_type' => Setting::where('key', 'payment_witholding_type')->value('value'),
                 ],
             ];
 
@@ -289,7 +238,9 @@ class TransactionIndex extends Component
             Session::flash('success', "Payment for transaction $transaction->number imported successfully.");
         } catch (\Throwable $th) {
             DB::rollBack();
-            if (config('app.debug', false)) throw $th;
+            if (config('app.debug', false)) {
+                throw $th;
+            }
             session()->flash('error', $th->getMessage());
         }
     }
@@ -315,6 +266,7 @@ class TransactionIndex extends Component
                 'search' => $this->search,
             ])
             ->paginate(24)->withQueryString();
-        return view('livewire.transaction-index', compact('transactions'));
+
+        return view('livewire.transaction-index', compact('transactions'))->layout('components.layouts.app', ['title' => 'All Product']);
     }
 }

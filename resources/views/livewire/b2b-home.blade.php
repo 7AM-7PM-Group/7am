@@ -27,15 +27,16 @@
             designed to support your company’s needs.</div>
         <div class="grid grid-cols-2 gap-4 mt-4 sm:grid-cols-2 md:grid-cols-3 items-start">
             @foreach ($products as $item)
-                <button wire:click="openShowModal('{{ $item->jurnal_id }}')" class="text-center mx-1 my-4">
+                <button wire:click="openShowModal('{{ $item->productID }}')" class="text-center mx-1 my-4">
                     <img src="{{ $item->image_url }}" alt="{{ $item->name }}"
                         class="rounded-lg aspect-square shadow mb-2">
 
                     <div class="px-2">
                         <div class="flex justify-between items-center mb-2">
-                            <p class="font-semibold text-xl text-left">{{ $item->name }}</p>
+                            <p class="font-semibold text-xl text-left">{{ $item->productName }}</p>
                         </div>
-                        <p class="text-[#D4A373] text-left">Rp. {{ number_format($item->price, 0, ',', '.') }}</p>
+                        <p class="text-[#D4A373] text-left">Rp. {{ number_format($item->display_price, 0, ',', '.') }}
+                        </p>
                     </div>
                 </button>
             @endforeach

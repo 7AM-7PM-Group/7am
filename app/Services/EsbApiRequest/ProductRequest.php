@@ -17,8 +17,8 @@ class ProductRequest
     {
         $path = '/product/list';
 
-        if (!empty($filters)) {
-            $path .= '?' . http_build_query($filters);
+        if (! empty($filters)) {
+            $path .= '?'.http_build_query($filters);
         }
 
         return $this->request->get($path);
@@ -28,11 +28,11 @@ class ProductRequest
     {
         $path = '/corev1/master/product';
 
-        if (!empty($filters)) {
-            $path .= '?' . http_build_query($filters);
+        if (! empty($filters)) {
+            $path .= '?'.http_build_query($filters);
         }
 
-        return $this->request->get($path);
+        return $this->request->get($path, 'fnb');
     }
 
     public function getProduct($id)

@@ -146,8 +146,9 @@
                                 ($item->mekari_sync_status == 'pending' &&
                                     (now()->greaterThanOrEqualTo($item->created_at->addMinutes(5)) ||
                                         $item?->payment?->mekari_sync_status == 'paid')))
-                            <flux:button size="sm" wire:click='importInvoice({{ $item->id }})'>Import
-                                Invoice to Jurnal
+                            <flux:button size="sm" wire:click='importSalesOrderToESB({{ $item->id }})'>
+                                Import
+                                Sales Order to ESB
                             </flux:button>
                         @endif
                         @if (!$item->deleted_at && $item->mekari_sync_status == 'pending' && $item->payment == null)

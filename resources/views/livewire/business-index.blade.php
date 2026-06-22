@@ -6,12 +6,6 @@
         </flux:button> --}}
     </div>
 
-    @if (session('Success'))
-        <div class="mb-4 p-3 bg-green-50 border border-green-200 text-green-800 rounded">
-            {{ session('Success') }}
-        </div>
-    @endif
-
     <flux:container-sidebar>
         <div class="flex gap-4">
             <div class="w-3/5">

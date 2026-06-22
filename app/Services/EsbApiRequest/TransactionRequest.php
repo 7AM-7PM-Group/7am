@@ -17,8 +17,8 @@ class TransactionRequest
     {
         $path = '/api/products';
 
-        if (!empty($filters)) {
-            $path .= '?' . http_build_query($filters);
+        if (! empty($filters)) {
+            $path .= '?'.http_build_query($filters);
         }
 
         return $this->request->get($path, $logContext);
@@ -31,7 +31,7 @@ class TransactionRequest
 
     public function createTransaction(array $data, array $logContext = [])
     {
-        return $this->request->post('/v1/transactions', $data, $logContext);
+        return $this->request->post('/sales/product-sales', 'core', $data, $logContext);
     }
 
     public function updateTransaction($id, array $data, array $logContext = [])

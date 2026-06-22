@@ -12,18 +12,22 @@ use Livewire\Component;
 
 class BusinessSyncFromEsb extends Component
 {
-    #[Validate("required")]
+    #[Validate('required')]
     public $customerID = '';
 
-    public $name = 'saddfads';
+    public $name = '';
 
-    public $id, $business, $customerList = [];
+    public $id;
 
-    public $title = "";
+    public $business;
+
+    public $customerList = [];
+
+    public $title = '';
 
     public function mount()
     {
-        $this->title = "Sync Customer from ESB";
+        $this->title = 'Sync Customer from ESB';
     }
 
     protected function customerRequest(): CustomerRequest
@@ -31,31 +35,33 @@ class BusinessSyncFromEsb extends Component
         return new CustomerRequest(new EsbApiRequest(app(EsbApiAuth::class)));
     }
 
-    #[On("syncCustomerFromESB")]
+    #[On('syncCustomerFromESB')]
     public function openSyncModal($id)
     {
         $this->business = Business::find($id);
         $this->id = $id;
         $this->name = $this->business?->name ?? '';
 
-        $filters = ["limit" => 9999];
+        $filters = ['limit' => 9999];
         $response = $this->customerRequest()->getCustomers($filters);
 
-        if (!$response) {
+        if (! $response) {
             if (config('app.debug')) {
                 throw new \Exception('Failed to fetch customers from ESB.');
             }
             session()->flash('error', 'Failed to fetch customers from ESB.');
+
             return;
         }
 
-        if ($response['status'] === "ok") {
+        if ($response['status'] === 'ok') {
             $this->customerList = collect($response['result']['data'])->pluck('customerName', 'customerID')->toArray();
         } else {
             if (config('app.debug')) {
-                throw new \Exception('Failed to fetch customers from ESB: ' . ($response['message'] ?? 'Unknown error'));
+                throw new \Exception('Failed to fetch customers from ESB: '.($response['message'] ?? 'Unknown error'));
             }
             session()->flash('error', 'Failed to fetch customers from ESB.');
+
             return;
         }
 
@@ -66,30 +72,42 @@ class BusinessSyncFromEsb extends Component
     {
         if ($this->business->customerID) {
             session()->flash('error', 'Customer Sudah Sync dengan dengan ESB.');
+
             return;
         }
+
+        // dd($this->customerID);
+
+        logger('customer isnt synced from ESB');
 
         $response = $this->customerRequest()->getCustomer($this->customerID);
 
-        if (!$response) {
+        if (! $response) {
+            return;
+        }
+        logger('get customer data from ESB');
+
+        if ($response['status'] !== 'ok') {
+            if (config('app.debug')) {
+                throw new \Exception('Failed to sync customer from ESB: '.($response['message'] ?? 'Unknown error'));
+            }
+            session()->flash('error', 'Failed to sync customer.');
+
             return;
         }
 
-        if ($response['status'] !== "ok") {
-            if (config('app.debug')) {
-                throw new \Exception('Failed to sync customer from ESB: ' . ($response['message'] ?? 'Unknown error'));
-            }
-            session()->flash('error', 'Failed to sync customer.');
-            return;
-        }
+        logger('get customer data from ESB');
 
         $this->business->update(
             [
                 'customerID' => $response['result']['customerID'],
-                'name' => $response['result']['customerName']
+                'name' => $response['result']['customerName'],
             ]
         );
-        session()->flash('success', 'Customer synced successfully!');
+
+        // session()->flash('success', 'Customer synced successfully!');
+        $this->dispatch('modal-close', name: 'sync-customer-from-esb-modal');
+        $this->dispatch('successSyncFromEsb');
     }
 
     public function render()

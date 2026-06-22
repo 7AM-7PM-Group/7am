@@ -17,8 +17,8 @@ class CustomerRequest
     {
         $path = '/customer';
 
-        if (!empty($filters)) {
-            $path .= '?' . http_build_query($filters);
+        if (! empty($filters)) {
+            $path .= '?'.http_build_query($filters);
         }
 
         return $this->request->get($path);
@@ -31,7 +31,7 @@ class CustomerRequest
 
     public function createCustomer(array $data)
     {
-        return $this->request->post('/customer', $data);
+        return $this->request->post('/customer', 'core', $data);
     }
 
     public function updateCustomer($id, array $data)

@@ -1,6 +1,5 @@
 <div class="space-y-4">
     <flux:session>All Product</flux:session>
-    <div class=""></div>
     <flux:container-sidebar>
         <div class="flex justify-between gap-4 ">
             <flux:input wire:model.live='search' placeholder='Search a Product' size='sm'></flux:input>

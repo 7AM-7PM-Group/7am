@@ -10,7 +10,10 @@ use Livewire\Component;
 
 class B2bHome extends Component
 {
-    public $products, $categories;
+    public $products;
+
+    public $categories;
+
     public function mount()
     {
         $user = Auth::user();
@@ -27,13 +30,13 @@ class B2bHome extends Component
         $this->products = Product::latest()->filters(['set_category' => $setCategory])->take(12)->get();
     }
 
-    public function openShowModal($jurnal_id)
+    public function openShowModal($productID)
     {
-        $this->dispatch('showModal', jurnal_id: $jurnal_id);
+        $this->dispatch('showModal', productID: $productID);
     }
 
     public function render()
     {
-        return view('livewire.b2b-home')->layout('components.layouts.app.header', ['title' => "Home"]);
+        return view('livewire.b2b-home')->layout('components.layouts.app.header', ['title' => 'Home']);
     }
 }

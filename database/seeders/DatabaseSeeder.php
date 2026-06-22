@@ -3,26 +3,19 @@
 namespace Database\Seeders;
 
 use App\Models\Address;
-use App\Models\Business;
-use App\Models\Cart;
-use App\Models\Category;
 use App\Models\District;
 use App\Models\Outlet;
-use App\Models\Product;
-use App\Models\RedeemPoint;
 use App\Models\Regency;
-use App\Models\SetCategory;
-use App\Models\SetCategoryItem;
 use App\Models\User;
 use App\Models\Village;
 use App\Services\JurnalApi;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
+
 // use PhpOffice\PhpSpreadsheet\Calculation\Category as CalculationCategory;
 
 class DatabaseSeeder extends Seeder
 {
-
     protected $jurnalApi;
 
     public function __construct(JurnalApi $jurnalApi)
@@ -53,14 +46,13 @@ class DatabaseSeeder extends Seeder
         $this->call(ReservationSeeder::class);
         $this->call(OutletReviewSeeder::class);
 
-
         foreach (Outlet::where('is_active', true)->get() as $key => $item) {
             $name = strtolower(array_reverse(explode(' ', $item->name))[0]);
             User::factory()->create([
                 'name' => "Admin $name",
                 'email' => "$name@admin.com",
                 'role' => 'outlet-admin',
-                'outlet_id' => $item->id
+                'outlet_id' => $item->id,
             ]);
         }
 
@@ -79,14 +71,14 @@ class DatabaseSeeder extends Seeder
             Address::factory()->recycle(User::all())->create([
                 'regency_id' => $regency->id,
                 'district_id' => $district->id,
-                'village_id' => $village->id
+                'village_id' => $village->id,
             ]);
         }
 
         $this->call(RedeemPointSeeder::class);
 
-        // $this->call(CategorySeeder::class);
-        // $this->call(ProductSeeder::class);
+        $this->call(CategorySeeder::class);
+        $this->call(ProductSeeder::class);
         $this->call(PricelistSeeder::class);
         // $this->call(CustomerPricelistSeeder::class);
 

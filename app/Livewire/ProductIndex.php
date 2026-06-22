@@ -9,21 +9,27 @@ use App\Models\SubCategory;
 use App\Services\EsbApiAuth;
 use App\Services\EsbApiRequest;
 use App\Services\EsbApiRequest\PricelistRequest;
-use App\Services\EsbApiRequest\ProductRequest;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\ImageManager;
-use Intervention\Image\Drivers\Gd\Driver;
-use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Drivers\Gd\Driver;
+use Intervention\Image\ImageManager;
 use Livewire\Attributes\Url;
 use Livewire\Attributes\Validate;
 use Livewire\Component;
+use Livewire\Features\SupportFileUploads\TemporaryUploadedFile;
 use Livewire\WithFileUploads;
 
 class ProductIndex extends Component
 {
     use WithFileUploads;
-    public $title = 'All Product', $productId, $categories, $subCategories;
+
+    public $title = 'All Product';
+
+    public $productId;
+
+    public $categories;
+
+    public $subCategories;
 
     protected EsbApiRequest $request;
 
@@ -44,16 +50,18 @@ class ProductIndex extends Component
 
     public $name = '';
 
-    #[Validate("nullable")]
+    #[Validate('nullable')]
     public $description = '';
 
-    #[Validate("nullable|file|image")]
+    #[Validate('nullable|file|image')]
     public $image;
 
     public $preview;
 
     #[Validate('required|integer')]
-    public $moq = 1, $maximum_order = 0;
+    public $moq = 1;
+
+    public $maximum_order = 0;
 
     #[Validate('required_unless:maximum_order, 0|nullable')]
     public $cutoff_time = '';
@@ -75,10 +83,12 @@ class ProductIndex extends Component
         // Jangan gunakan dd() di sini karena akan memutus sinkronisasi state Livewire
     }
 
-    public function sync(EsbApiAuth $auth)
+    public function sync()
     {
-        Product::sync(new ProductRequest(new EsbApiRequest($auth)));
-        CustomerPricelist::sync(new PricelistRequest(new EsbApiRequest($auth)));
+        Product::syncProduct();
+        CustomerPricelist::syncCustomerPricelist();
+        // CustomerPricelist::sync(new PricelistRequest(new EsbApiRequest($auth)));
+
     }
 
     public function openEditModal($id)
@@ -88,7 +98,7 @@ class ProductIndex extends Component
         $this->productId = $id;
         $product = Product::find($id);
         $this->name = $product->name;
-        $this->preview = $product->image ? asset('storage/' . $product->image) : '';
+        $this->preview = $product->image ? asset('storage/'.$product->image) : '';
         $this->description = $product->description;
         $this->moq = $product->moq ?? 1;
         $this->maximum_order = $product->maximum_order ?? 0;
@@ -106,7 +116,7 @@ class ProductIndex extends Component
 
             $product = Product::find($this->productId);
 
-            if (!$product) {
+            if (! $product) {
                 return;
             }
 
@@ -114,7 +124,7 @@ class ProductIndex extends Component
             $path = $oldPath;
 
             if ($this->image instanceof TemporaryUploadedFile) {
-                $manager = new ImageManager(new Driver());
+                $manager = new ImageManager(new Driver);
                 $image = $manager->read($this->image->getRealPath());
 
                 // Optimasi gambar
@@ -127,8 +137,8 @@ class ProductIndex extends Component
                     $encoded = $image->toWebp($quality);
                 }
 
-                $filename = uniqid() . '.webp';
-                $path = 'product/' . $filename;
+                $filename = uniqid().'.webp';
+                $path = 'product/'.$filename;
                 Storage::disk('public')->put($path, (string) $encoded);
             }
 
@@ -147,16 +157,17 @@ class ProductIndex extends Component
             }
 
             DB::commit();
-            session()->flash('success', "Product updated successfully");
+            session()->flash('success', 'Product updated successfully');
             $this->dispatch('modal-close', name: 'edit-product-modal');
             $this->reset('image');
         } catch (\Throwable $th) {
             DB::rollBack();
-            if (config('app.debug')) throw $th;
-            session()->flash('error', "Failed to update product: " . $th->getMessage());
+            if (config('app.debug')) {
+                throw $th;
+            }
+            session()->flash('error', 'Failed to update product: '.$th->getMessage());
         }
     }
-
 
     public function render()
     {

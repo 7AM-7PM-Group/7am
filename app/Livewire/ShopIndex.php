@@ -14,10 +14,17 @@ use Livewire\WithPagination;
 class ShopIndex extends Component
 {
     use WithPagination;
-    public $filter = false, $categories;
+
+    public $filter = false;
+
+    public $categories;
 
     #[Url(except: '')]
-    public $search = '', $min = '', $max = '';
+    public $search = '';
+
+    public $min = '';
+
+    public $max = '';
 
     #[Url(except: '')]
     public $category = '';
@@ -53,14 +60,14 @@ class ShopIndex extends Component
         $this->category = '';
     }
 
-    public function openShowModal($jurnal_id)
+    public function openShowModal($productID)
     {
-        $this->dispatch('showModal', jurnal_id: $jurnal_id);
+        $this->dispatch('showModal', productID: $productID);
     }
 
     public function toogleFilter()
     {
-        $this->filter = !$this->filter;
+        $this->filter = ! $this->filter;
     }
 
     public function render()
@@ -84,7 +91,7 @@ class ShopIndex extends Component
             'category' => $this->category,
             'min' => $this->min,
             'max' => $this->max,
-            'set_category' => $setCategoryId
+            'set_category' => $setCategoryId,
         ])->paginate(24)->withQueryString();
 
         // dd([
@@ -93,6 +100,6 @@ class ShopIndex extends Component
         //     'final_set_category_id' => $setCategoryId,
         // ]);
 
-        return view('livewire.shop-index', compact('products'))->layout('components.layouts.app.header', ['title' => "Shop"]);
+        return view('livewire.shop-index', compact('products'))->layout('components.layouts.app.header', ['title' => 'Shop']);
     }
 }

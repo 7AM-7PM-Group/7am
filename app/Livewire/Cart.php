@@ -2,32 +2,59 @@
 
 namespace App\Livewire;
 
-use Carbon\Carbon;
+use App\Mail\Order\Order;
 use App\Models\Address;
 use App\Models\Cart as ModelsCart;
 use App\Models\Coupon;
-use App\Models\Outlet;
-use Livewire\Component;
-use App\Models\Shipping;
-use App\Models\CouponUsage;
-use App\Models\Transaction;
 use App\Models\CouponProduct;
+use App\Models\CouponUsage;
 use App\Models\MinimumOrder;
-use App\Models\Payment;
+use App\Models\Outlet;
 use App\Models\Setting;
+use App\Models\Shipping;
+use App\Models\Transaction;
 use App\Models\TransactionItem;
-use Illuminate\Support\Facades\DB;
+use Carbon\Carbon;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
-use Illuminate\Support\Facades\Cache;
+use Livewire\Component;
 use PhpOffice\PhpSpreadsheet\Calculation\Statistical\Minimum;
-
-use function Pest\Laravel\session;
 
 class Cart extends Component
 {
-    public $carts, $qty, $subtotal, $coupon, $cpn = false, $c, $message, $addresses, $address, $outlet, $note, $outlets, $min, $shipping_date, $packaging_fee;
+    public $carts;
+
+    public $qty;
+
+    public $subtotal;
+
+    public $coupon;
+
+    public $cpn = false;
+
+    public $c;
+
+    public $message;
+
+    public $addresses;
+
+    public $address;
+
+    public $outlet;
+
+    public $note;
+
+    public $outlets;
+
+    public $min;
+
+    public $shipping_date;
+
+    public $packaging_fee;
+
     public $fulfillment = 'delivery';
 
     public $isProcessing = false;
@@ -48,7 +75,7 @@ class Cart extends Component
         $this->addresses = Auth::user()->addresses;
         $this->address = $this->addresses->first();
 
-        $this->outlets = Outlet::where("is_active", true)->orderBy("name", "asc")->get();
+        $this->outlets = Outlet::where('is_active', true)->orderBy('name', 'asc')->get();
         $this->outlet = $this->outlets->first();
 
         $this->setMinShippingDate();
@@ -65,23 +92,26 @@ class Cart extends Component
         $this->carts();
 
         // Acquire a cache lock to prevent concurrent checkout runs for the same user
-        $lockKey = 'checkout_user_' . Auth::id();
+        $lockKey = 'checkout_user_'.Auth::id();
         $lock = Cache::lock($lockKey, 10);
 
-        if (!$lock->get()) {
+        if (! $lock->get()) {
             Session::flash('error', 'Checkout is already in progress. Please wait a moment and try again.');
+
             return;
         }
 
         try {
             if (is_null(Auth::user()->Businesses) || Auth::user()->Businesses?->status != 'approved') {
                 Session::flash('error', 'Your business is not approved yet. Please contact admin.');
+
                 return;
             }
             // jika ada transaksi yang sudah melewati due_date (overdue) untuk user
             // yang memiliki tenor, blokir checkout sampai pelunasan.
             if ($this->checkPayment()) {
                 $this->isProcessing = false;
+
                 return;
             }
 
@@ -93,6 +123,7 @@ class Cart extends Component
             if (empty($this->shipping_date)) {
                 Session::flash('error', 'Please choose a shipping date.');
                 $this->isProcessing = false;
+
                 return;
             }
 
@@ -102,12 +133,14 @@ class Cart extends Component
             } catch (\Throwable $e) {
                 Session::flash('error', 'Invalid shipping date format.');
                 $this->isProcessing = false;
+
                 return;
             }
 
             if ($shipDate->lt($minDate)) {
-                Session::flash('error', 'Shipping date must be on or after ' . $minDate->toDateString() . '. Please adjust shipping date.');
+                Session::flash('error', 'Shipping date must be on or after '.$minDate->toDateString().'. Please adjust shipping date.');
                 $this->isProcessing = false;
+
                 return;
             }
 
@@ -116,6 +149,7 @@ class Cart extends Component
                 if (empty($this->address) || is_null($this->address->id)) {
                     $this->isProcessing = false;
                     Session::flash('error', 'Please select a delivery address before checkout.');
+
                     return;
                 }
 
@@ -127,22 +161,22 @@ class Cart extends Component
                     }
 
                     if ($subtotal < Auth::user()->Businesses->minimum_order) {
-                        Session::flash('error', 'Minimum order for your business is Rp. ' . number_format(Auth::user()->Businesses->minimum_order, 0, ',', '.'));
+                        Session::flash('error', 'Minimum order for your business is Rp. '.number_format(Auth::user()->Businesses->minimum_order, 0, ',', '.'));
                         $this->isProcessing = false;
+
                         return;
                     }
                 } else {
                     $minimumOrder = MinimumOrder::where('village_id', $this->address->village_id)->first();
 
                     if ($minimumOrder && $this->subtotal < $minimumOrder->minimum) {
-                        Session::flash('error', 'Minimum order to ' . ($minimumOrder->village->name ?? '') . ' is Rp. ' . number_format($minimumOrder->minimum, 0, ',', '.'));
+                        Session::flash('error', 'Minimum order to '.($minimumOrder->village->name ?? '').' is Rp. '.number_format($minimumOrder->minimum, 0, ',', '.'));
                         $this->isProcessing = false;
+
                         return;
                     }
                 }
             }
-
-
 
             $this->isProcessing = true;
 
@@ -180,6 +214,7 @@ class Cart extends Component
                         $this->isProcessing = false;
                         Session::flash('error', 'Please select an outlet before checkout.');
                         DB::rollBack();
+
                         return;
                     }
 
@@ -201,8 +236,8 @@ class Cart extends Component
                         'transaction_id' => $transaction->id,
                         'product_id' => $item->product_id,
                         'qty' => $item->qty,
-                        'price' => $item->product->price,
-                        'subtotal' => $item->qty * $item->product->price
+                        'price' => $item->product->display_price,
+                        'subtotal' => $item->qty * $item->product->display_price,
                     ]);
                 }
 
@@ -214,15 +249,17 @@ class Cart extends Component
                 ModelsCart::where('user_id', Auth::user()->id)->delete();
 
                 DB::commit();
-                Mail::to(Auth::user()->email)->queue(new \App\Mail\Order\Order($transaction->slug));
+                Mail::to(Auth::user()->email)->queue(new Order($transaction->slug));
                 $this->redirect(route('history'));
             } catch (\Throwable $th) {
                 DB::rollBack();
                 $this->dispatch('modal-close', name: 'checkoutModal');
+
                 return;
 
-                if (config('app.debug', false))
+                if (config('app.debug', false)) {
                     throw $th;
+                }
                 Session::flash('error', $th->getMessage());
             }
         } finally {
@@ -258,6 +295,7 @@ class Cart extends Component
             Session::flash('error', 'You have overdue transactions. Please settle outstanding invoices before checkout.');
             // juga bisa dispatch event untuk UI
             $this->dispatch('error', ['message' => 'overdue']);
+
             return true;
         }
 
@@ -277,7 +315,7 @@ class Cart extends Component
         $subtotal = 0;
 
         foreach ($this->carts as $key => $item) {
-            $subtotal += $item->qty * $item->product->price;
+            $subtotal += $item->qty * $item->product->display_price;
         }
         if (Setting::where('key', 'use_tax_inclusive')->value('value') === 'true') {
             $this->subtotal = $subtotal * 100 / 103;
@@ -350,20 +388,20 @@ class Cart extends Component
         if ($coupon) {
             if ($coupon->is_active()) {
                 $this->c = $coupon;
-                $this->message = "Coupon Applied";
+                $this->message = 'Coupon Applied';
             } else {
                 $this->c = '';
-                $this->message = "Coupon Expired";
+                $this->message = 'Coupon Expired';
             }
         } else {
             $this->c = '';
-            $this->message = "Coupon Invalid";
+            $this->message = 'Coupon Invalid';
         }
     }
 
     public function countDiscount()
     {
-        if (!$this->c ?? false) {
+        if (! $this->c ?? false) {
             return 0;
         }
         if ($this->subtotal > $this->c->minimum) {
@@ -375,15 +413,17 @@ class Cart extends Component
                     $link = CouponProduct::where('coupon_id', $this->c->id)->where('product_id', $item->product->id)->first();
 
                     if ($link) {
-                        $discount += $this->c->amount / 100 * $item->product->price * $item->qty;
+                        $discount += $this->c->amount / 100 * $item->product->display_price * $item->qty;
                     }
                 }
                 if ($this->c->maximum > 0) {
                     $discount = min($discount, $this->c->maximum);
                 }
+
                 return $discount;
             }
         }
+
         return 0;
     }
 
@@ -395,7 +435,7 @@ class Cart extends Component
 
         $add = 0;
 
-        if (!$now->lt($now->copy()->setTime(17, 0))) {
+        if (! $now->lt($now->copy()->setTime(17, 0))) {
             // sebelum jam 5 sore → minimal besok
             $min++;
         }
@@ -407,7 +447,7 @@ class Cart extends Component
             $max = $product->maximum_order ?? 0;
 
             // jika maximum_order tidak disetel atau nol => tidak ada batas
-            if (!$max || $max <= 0) {
+            if (! $max || $max <= 0) {
                 continue;
             }
 

@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Business;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Business>
+ * @extends Factory<Business>
  */
 class BusinessFactory extends Factory
 {
@@ -19,16 +20,15 @@ class BusinessFactory extends Factory
     {
         return [
             'name' => fake()->sentence(2, false),
-            'npwp' => fake()->numerify("##########"),
+            'npwp' => fake()->numerify('##########'),
             'address' => fake()->address(),
             'bank' => fake()->word(),
-            'account_number' => fake()->numerify("##########"),
+            'account_number' => fake()->numerify('##########'),
             'account_name' => fake()->name(),
             'id_card' => 'id/card1.jpg',
             'representative' => fake()->name(),
-            "phone" => fake()->phoneNumber(),
+            'phone' => fake()->phoneNumber(),
             'user_id' => User::factory(),
-            'customerID' => mt_rand(100, 999)
         ];
     }
 }

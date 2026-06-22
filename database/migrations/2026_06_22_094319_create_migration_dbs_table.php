@@ -1,7 +1,5 @@
 <?php
 
-use App\Models\Business;
-use App\Models\Product;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Support\Facades\Schema;
@@ -13,11 +11,11 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('customer_pricelists', function (Blueprint $table) {
+        Schema::create('migration_dbs', function (Blueprint $table) {
             $table->id();
-            $table->foreignIdFor(Business::class, 'customer_id');
-            $table->foreignIdFor(Product::class);
-            $table->double('price');
+            $table->string('process');
+            $table->timestamp('running_at')->nullable();
+            $table->boolean('status')->default(0);
             $table->timestamps();
         });
     }
@@ -27,6 +25,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('customer_pricelists');
+        Schema::dropIfExists('migration_dbs');
     }
 };

@@ -26,4 +26,7 @@ return [
         'staging' => env('ESB_FNB_STG'),
         'production' => env('ESB_FNB_PROD'),
     ],
+
+    'static_token' => env('ESB_STATIC_TOKEN'),
+
 ];

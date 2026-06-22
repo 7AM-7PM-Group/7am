@@ -2,33 +2,24 @@
 
 namespace App\Models;
 
-use App\Models\Cart;
-use App\Models\Coupon;
-use App\Models\CouponProduct;
-use App\Models\CustomerPricelist;
-use App\Models\SubCategory;
 use App\Services\EsbApiAuth;
 use App\Services\EsbApiRequest;
 use App\Services\EsbApiRequest\ProductRequest;
-use App\Services\JurnalApi;
-use App\Services\JurnalApiResponse;
 use Cviebrock\EloquentSluggable\Sluggable;
+use Database\Factories\ProductFactory;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
 
 class Product extends Model
 {
-    /** @use HasFactory<\Database\Factories\ProductFactory> */
+    /** @use HasFactory<ProductFactory> */
     use HasFactory, Sluggable, SoftDeletes;
 
     /**
      * Return the sluggable configuration array for this model.
-     *
-     * @return array
      */
     public function sluggable(): array
     {
@@ -37,14 +28,16 @@ class Product extends Model
                 'onUpdate' => true,
                 'source' => [
                     'productCode',
-                    'productName'
-                ]
-            ]
+                    'productName',
+                ],
+            ],
         ];
     }
 
     protected $guarded = ['id'];
+
     protected $perPage = 12;
+
     protected $jurnalApi;
 
     public function cart()
@@ -55,20 +48,21 @@ class Product extends Model
     public function getDisplayPriceAttribute()
     {
 
-        dd(
-            $this->productID,
-            $this->pricelist()->count(),
-            $this->pricelist()->first()
-        );
+        // dd(
+        //     $this->productID,
+        //     $this->pricelist()->count(),
+        //     $this->pricelist()->first()
+        // );
 
-        $customerId = Auth::user()?->businesses?->id;
+        $customerId = Auth::user()?->businesses?->customerID;
 
-        if (!$customerId) {
+        if (! $customerId) {
+            dd('customer not found');
+
             return $this->price;
         }
-        $customerPrice = $this->pricelist()
-            ->where('customer_id', $customerId)
-            ->value('price');
+
+        $customerPrice = $this->pricelist->where('customer_id', $customerId)->first()->price;
 
         return $customerPrice ?? $this->price;
     }
@@ -101,28 +95,28 @@ class Product extends Model
 
     public function scopeFilters(Builder $query, array $filters)
     {
-        $query->when($filters["search"] ?? false, function ($query, $search) {
+        $query->when($filters['search'] ?? false, function ($query, $search) {
             return $query->where(function ($q) use ($search) {
-                $q->where("name", "like", "%{$search}%")
-                    ->orWhere("product_code", "like", "%{$search}%");
+                $q->where('productName', 'like', "%{$search}%")
+                    ->orWhere('productCode', 'like', "%{$search}%");
             });
         });
 
-        $query->when($filters["min"] ?? false, function ($query, $search) {
-            return $query->where("price", ">", "$search");
+        $query->when($filters['min'] ?? false, function ($query, $search) {
+            return $query->where('price', '>', "$search");
         });
 
-        $query->when($filters["max"] ?? false, function ($query, $search) {
-            return $query->where("price", "<", "$search");
+        $query->when($filters['max'] ?? false, function ($query, $search) {
+            return $query->where('price', '<', "$search");
         });
 
-        $query->when($filters["category"] ?? false, function ($query, $category) {
+        $query->when($filters['category'] ?? false, function ($query, $category) {
             return $query->whereHas('category', function ($q) use ($category) {
                 $q->where('slug', $category);
             });
         });
 
-        $query->when($filters["sub_category"] ?? null, function ($query, $subCategory) {
+        $query->when($filters['sub_category'] ?? null, function ($query, $subCategory) {
             return $query->whereHas('subCategory', function ($q) use ($subCategory) {
                 $q->where('slug', $subCategory);
             });
@@ -146,7 +140,7 @@ class Product extends Model
 
         $formattedNumber = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
 
-        return $prefix . $formattedNumber;
+        return $prefix.$formattedNumber;
     }
 
     public function getImageUrlAttribute()
@@ -158,35 +152,50 @@ class Product extends Model
         return asset('assets/No-Picture-Found.png');
     }
 
-    public static function sync()
+    public static function syncProduct()
     {
         $request = new ProductRequest(new EsbApiRequest(app(EsbApiAuth::class)));
+        $page = 1;
+        do {
 
-        $response = $request->getMasterProducts();
+            $response = $request->getMasterProducts(['page' => $page]);
 
-        if (!$response || $response['status'] === "fail") {
-            if (config('app.debug')) {
-                throw new \Exception($response['message'] ?? '');
-            }
-            session()->flash('error', $response['message'] ?? '');
-            return;
-        }
-
-        $result = $response['result']['data'];
-
-        foreach ($result as $key => $item) {
-            foreach ($item['productDetails'] as  $detail) {
-                if ($detail['defaultUnit']['baseUnit']) {
-                    $price = $detail['basePrice'];
-                    break;
+            if (! $response || $response['status'] === 'fail') {
+                if (config('app.debug')) {
+                    throw new \Exception($response['message'] ?? '');
                 }
-            }
-            $item['price'] = $price ?? 0;
+                session()->flash('error', $response['message'] ?? '');
 
-            Product::updateOrCreate(
-                ['productID' => $item['productID']],
-                $item
-            );
-        }
+                return;
+            }
+
+            $result = $response['result']['data'];
+
+            foreach ($result as $key => $item) {
+                foreach ($item['productDetails'] as $detail) {
+                    if ($detail['defaultUnit']['baseUnit']) {
+                        $price = $detail['basePrice'];
+                        $unit = $detail['unit'];
+                        break;
+                    }
+                }
+                $item['price'] = $price ?? 0;
+                $item['unit'] = $unit ?? '';
+
+                $item['category_id'] = $item['categoryID'];
+                $item['sub_category_id'] = $item['subCategoryID'];
+
+                // dd(
+                //     $item
+                // );
+
+                Product::updateOrCreate(
+                    ['productID' => $item['productID']],
+                    $item
+                );
+            }
+            $page++;
+        } while ($response['next'] ?? false);
+
     }
 }

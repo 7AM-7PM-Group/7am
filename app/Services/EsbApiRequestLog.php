@@ -17,7 +17,7 @@ class EsbApiRequestLog
     public function store(array $data)
     {
         $requestType = $data['request_type'] ?? null;
-        if (!$requestType) {
+        if (! $requestType) {
             $requestType = ($data['success'] ?? false) ? 'sync_success' : 'sync_failed';
         }
 
@@ -56,7 +56,7 @@ class EsbApiRequestLog
     public function paginate(array $filters = [], int $perPage = 50)
     {
         return $this->buildQuery($filters)
-            ->orderBy('created_at', 'desc')
+            ->orderBy('id', 'desc')
             ->paginate($perPage);
     }
 
@@ -151,7 +151,7 @@ class EsbApiRequestLog
             ->get();
     }
 
-    public function deleteExpiredRecords(string $requestType = null, int $limit = 1000): int
+    public function deleteExpiredRecords(?string $requestType = null, int $limit = 1000): int
     {
         $query = DB::table('esb_api_request_logs')
             ->where('expired_at', '<=', now());

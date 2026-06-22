@@ -10,14 +10,18 @@ use Livewire\Component;
 
 class ShopShow extends Component
 {
-    public $product, $products = [], $qty = 1;
+    public $product;
+
+    public $products = [];
+
+    public $qty = 1;
 
     protected $jurnalApi;
 
     #[On('showModal')]
-    public function openShowModal($jurnal_id)
+    public function openShowModal($productID)
     {
-        $this->product = Product::where('jurnal_id', $jurnal_id)->firstOrFail();
+        $this->product = Product::where('productID', $productID)->firstOrFail();
 
         $this->qty = $this->product->moq;
 
@@ -29,7 +33,7 @@ class ShopShow extends Component
 
         $user = Auth::user();
 
-        if (!$user) {
+        if (! $user) {
             return redirect(route('login'));
         }
 
@@ -42,7 +46,7 @@ class ShopShow extends Component
             Cart::create([
                 'user_id' => Auth::user()->id,
                 'product_id' => $this->product->id,
-                'qty' => $this->qty
+                'qty' => $this->qty,
             ]);
             $this->dispatch('created');
         }
@@ -52,6 +56,6 @@ class ShopShow extends Component
 
     public function render()
     {
-        return view('livewire.shop-show')->layout('components.layouts.app', ['title' => "asd"]);
+        return view('livewire.shop-show')->layout('components.layouts.app', ['title' => 'asd']);
     }
 }

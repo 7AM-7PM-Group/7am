@@ -11,8 +11,6 @@ class EsbApiAuth
 
     private $password;
 
-    private $apiUrl;
-
     private EsbApiRequestLog $requestLog;
 
     private const ACCESS_TOKEN_BUFFER_SECONDS = 300;
@@ -22,22 +20,46 @@ class EsbApiAuth
     // Key untuk Cache agar tidak bentrok antar user jika diperlukan
     private const CACHE_KEY_PREFIX = 'esb_api_tokens_';
 
-    public function __construct($username, $password, $environment = 'sandbox')
+    public function __construct($username, $password)
     {
+        // dd(__FILE__);
         $this->username = $username;
         $this->password = $password;
-        $this->apiUrl = $baseUrl && is_string($baseUrl)
-            ? rtrim($baseUrl, '/')
-            : ($environment === 'production'
-                ? 'https://services.esb.co.id/core'
-                : 'https://stg7.esb.co.id/core-stg');
 
         $this->requestLog = new EsbApiRequestLog;
     }
 
-    public function getApiUrl()
+    public function getApiUrl($baseUrl = 'core')
     {
-        return $this->apiUrl;
+        if ($baseUrl === 'core') {
+            return $this->coreUrl();
+        } elseif ($baseUrl === 'fnb') {
+            return $this->fnbUrl();
+        } else {
+            if (is_array($baseUrl)) {
+                $baseUrl = json_encode($baseUrl);
+            }
+            throw new Exception('Invalid base URL: '.$baseUrl);
+        }
+    }
+
+    public function coreUrl(): string
+    {
+        return config(
+            'ESB.core.'.config('ESB.env')
+        );
+    }
+
+    public function fnbUrl(): string
+    {
+        return config(
+            'ESB.fnb.'.config('ESB.env')
+        );
+    }
+
+    public function getStaticToken()
+    {
+        return config('ESB.static_token');
     }
 
     public function getAccessToken()
@@ -82,6 +104,16 @@ class EsbApiAuth
 
     public function authenticateIfNeeded()
     {
+        // dd(
+        //     // $this->getRefreshToken(),
+        //     $this->isRefreshTokenValid(),
+        //     $this->isAccessTokenValid(),
+        //     $this->getAccessToken(),
+        //     $this->getRefreshToken(),
+        //     Cache::get(self::CACHE_KEY_PREFIX.'access_token_expires_at'),
+        //     Cache::get(self::CACHE_KEY_PREFIX.'refresh_token_expires_at'),
+        //     time(),
+        // );
         if ($this->isAccessTokenValid()) {
             return;
         }
@@ -101,7 +133,7 @@ class EsbApiAuth
     public function authenticate()
     {
         $ch = curl_init();
-        $authUrl = $this->apiUrl.'/auth/login';
+        $authUrl = $this->getApiUrl().'/auth/login';
 
         curl_setopt($ch, CURLOPT_URL, $authUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
@@ -183,19 +215,19 @@ class EsbApiAuth
         }
 
         $ch = curl_init();
-        $refreshUrl = $this->apiUrl.'/auth/refresh';
+        $refreshUrl = $this->getApiUrl().'/auth/refresh';
 
         curl_setopt($ch, CURLOPT_URL, $refreshUrl);
         curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
         curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, false);
         curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, false);
 
-        $headers = [
-            'Content-Type: application/json',
-            'Accept: application/json',
-        ];
+        curl_setopt($ch, CURLOPT_HTTPGET, true);
 
-        curl_setopt($ch, CURLOPT_HTTPHEADER, $headers);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Accept: application/json',
+            'Authorization: Bearer '.$refreshToken,
+        ]);
 
         $response = curl_exec($ch);
         $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
@@ -242,6 +274,8 @@ class EsbApiAuth
                 'error_message' => $result['message'] ?? 'Token refresh failed',
             ]);
 
+            return $this->authenticate();
+
             if (! config('app.debug')) {
                 session()->flash('error', 'Token refresh failed: '.($result['message'] ?? 'Unknown error'));
 
@@ -252,6 +286,11 @@ class EsbApiAuth
         }
 
         $this->storeTokens($result);
+
+        // dd($result, $this->getAccessToken(), $this->getRefreshToken()); // Hapus atau komentari baris ini
+        // Jika refresh token ditolak (401), otomatis login ulang dengan username/password
+        // Logika ini sudah ada di dalam blok if ($httpCode >= 400) di atas, jadi tidak perlu di sini.
+        // Pastikan tidak ada dd() yang menghentikan eksekusi setelah token berhasil di-refresh.
 
         $this->logAuthEvent([
             'method' => 'POST',
@@ -271,15 +310,18 @@ class EsbApiAuth
 
     private function storeTokens(array $result)
     {
-        if (isset($result['result']['accessToken'])) {
-            Cache::put(self::CACHE_KEY_PREFIX.'access_token', $result['result']['accessToken'], now()->addDays(7));
-            // Default expiry 1 jam jika tidak ada di response
-            Cache::put(self::CACHE_KEY_PREFIX.'access_token_expires_at', time() + 3600, now()->addDays(7));
+        $data = $result['result'] ?? [];
+
+        if (isset($data['accessToken'])) {
+            Cache::put(self::CACHE_KEY_PREFIX.'access_token', $data['accessToken'], now()->addDays(7));
+            // Gunakan expires_in dari API jika tersedia, jika tidak, default ke 1 jam (3600 detik)
+            $expiresIn = $data['expires_in'] ?? 3600;
+            Cache::put(self::CACHE_KEY_PREFIX.'access_token_expires_at', time() + $expiresIn, now()->addDays(7));
         }
 
-        if (isset($result['result']['refreshToken'])) {
-            Cache::put(self::CACHE_KEY_PREFIX.'refresh_token', $result['result']['refreshToken'], now()->addDays(30));
-            Cache::put(self::CACHE_KEY_PREFIX.'refresh_token_expires_at', time() + 86400, now()->addDays(30));
+        if (isset($data['refreshToken'])) {
+            Cache::put(self::CACHE_KEY_PREFIX.'refresh_token', $data['refreshToken'], now()->addDays(30));
+            Cache::put(self::CACHE_KEY_PREFIX.'refresh_token_expires_at', time() + 86400, now()->addDays(30)); // Refresh token biasanya memiliki masa berlaku yang lebih lama
         }
     }
 

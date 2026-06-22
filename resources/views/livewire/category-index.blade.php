@@ -109,7 +109,7 @@
             <div class="flex gap-4 border-b py-3 min-w-lg w-full">
                 <div class="w-10">{{ $index + 1 }}</div>
                 <div class="w-1/2">{{ $sub->subCategoryName }}</div>
-                <div class="w-1/2 text-center">{{ $sub->note ?? '-' }}</div>
+                <div class="w-1/2 text-center">{{ $sub->notes ?? '-' }}</div>
             </div>
         @endforeach
     </flux:container-sidebar>

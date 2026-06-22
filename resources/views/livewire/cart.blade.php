@@ -27,19 +27,19 @@
                         <div
                             class="grid grid-cols-6 items-center py-4 border-b text-xs md:text-sm border-gray-200 text-center">
                             <button class="flex items-center gap-2 mb-4 md:mb-0 col-span-4 md:col-span-2 text-left"
-                                wire:click="openShowModal('{{ $item->product?->jurnal_id ?? '' }}')">
+                                wire:click="openShowModal('{{ $item->product?->productID ?? '' }}')">
                                 <div class="size-20 rounded bg-center bg-cover bg-no-repeat"
                                     style="background-image: url({{ $item->product->image_url }})">
                                 </div>
                                 <div class="">
                                     <div class="font-semibold text-[#4B2E05] dark:text-white">
-                                        {{ $item->product?->name ?? 'Product' }}</div>
+                                        {{ $item->product?->productName ?? 'Product' }}</div>
                                     <div class="text-xs md:text-sm dark:text-neutral-300">
-                                        {{ $item->product?->category?->name ?? '' }}</div>
+                                        {{ $item->product?->category?->categoryName ?? '' }}</div>
                                 </div>
                             </button>
                             <div class="text-gray-800 col-span-2 md:col-span-1 font-medium dark:text-neutral-300">Rp.
-                                {{ number_format($item->product?->price ?? 0, 0, ',', '.') }}
+                                {{ number_format($item->product?->display_price ?? 0, 0, ',', '.') }}
                             </div>
 
                             <div class="flex items-center col-span-2 md:col-span-1 justify-center gap-2">
@@ -57,7 +57,7 @@
                             </div>
 
                             <div class="flex items-center col-span-2 md:col-span-1 justify-center font-medium">
-                                Rp. {{ number_format(($item->product?->price ?? 0) * $item->qty, 0, ',', '.') }}
+                                Rp. {{ number_format(($item->product?->display_price ?? 0) * $item->qty, 0, ',', '.') }}
                             </div>
 
                             <div class="text-center col-span-2 md:col-span-1">

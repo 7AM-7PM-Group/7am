@@ -33,7 +33,7 @@ class EsbApiRequest
         $retried = false;
 
         try {
-            $responseData = $this->executeRequest($method, $url, $body);
+            $responseData = $this->executeRequest($method, $url, $baseUrl, $body);
 
             if ($responseData['httpCode'] === 401 && $this->auth->getRefreshToken()) {
                 $this->auth->refreshAccessToken();
@@ -80,27 +80,27 @@ class EsbApiRequest
         return $responseData['result'];
     }
 
-    public function get($path, array $logContext = [])
+    public function get($path, $baseUrl = 'core', array $logContext = [])
     {
-        return $this->request('GET', $path, null, 'core', $logContext);
+        return $this->request('GET', $path, null, $baseUrl, $logContext);
     }
 
-    public function post($path, $body = [], array $logContext = [])
+    public function post($path, $baseUrl = 'core', $body = [], array $logContext = [])
     {
-        return $this->request('POST', $path, $body, 'core', $logContext);
+        return $this->request('POST', $path, $body, $baseUrl, $logContext);
     }
 
-    public function put($path, $body = [], array $logContext = [])
+    public function put($path, $baseUrl = 'core', $body = [], array $logContext = [])
     {
-        return $this->request('PUT', $path, $body, 'core', $logContext);
+        return $this->request('PUT', $path, $body, $baseUrl, $logContext);
     }
 
-    public function delete($path, array $logContext = [])
+    public function delete($path, $baseUrl = 'core', array $logContext = [])
     {
-        return $this->request('DELETE', $path, null, 'core', $logContext);
+        return $this->request('DELETE', $path, null, $baseUrl, $logContext);
     }
 
-    protected function executeRequest($method, $url, $body = null)
+    protected function executeRequest($method, $url, $baseUrl = 'core', $body = null)
     {
         $ch = curl_init();
 
@@ -111,10 +111,12 @@ class EsbApiRequest
         curl_setopt($ch, CURLOPT_CUSTOMREQUEST, strtoupper($method));
 
         $headers = [
-            'Authorization: Bearer '.$this->auth->getAccessToken(),
+            'Authorization: Bearer '.($baseUrl === 'core' ? $this->auth->getAccessToken() : $this->auth->getStaticToken()),
             'Accept: application/json',
             'Content-Type: application/json',
         ];
+
+        // dd($headers);
 
         if (! empty($body)) {
             $jsonBody = json_encode($body);
@@ -143,6 +145,7 @@ class EsbApiRequest
 
         return [
             'httpCode' => $httpCode,
+            'headers' => $headers,
             'result' => json_decode($response, true),
         ];
     }

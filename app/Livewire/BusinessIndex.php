@@ -3,11 +3,9 @@
 namespace App\Livewire;
 
 use App\Models\Business;
-use App\Models\SetCategory;
 use App\Services\EsbApiAuth;
 use App\Services\EsbApiRequest;
 use App\Services\EsbApiRequest\CustomerRequest;
-use Illuminate\Support\Facades\DB;
 use Livewire\Attributes\On;
 use Livewire\Attributes\Url;
 use Livewire\Attributes\Validate;
@@ -15,7 +13,11 @@ use Livewire\Component;
 
 class BusinessIndex extends Component
 {
-    public $title = "Customers", $business, $businesses;
+    public $title = 'Customers';
+
+    public $business;
+
+    public $businesses;
 
     #[Validate('required')]
     public $status = '';
@@ -27,7 +29,9 @@ class BusinessIndex extends Component
     public $sts = '';
 
     #[Validate('required_if:status,accepted')]
-    public $name = '', $set_category_id;
+    public $name = '';
+
+    public $set_category_id;
 
     public function mount()
     {
@@ -53,6 +57,14 @@ class BusinessIndex extends Component
         $this->getBusiness();
     }
 
+    #[On('successSyncFromEsb')]
+    public function successSyncFromEsb()
+    {
+        // dd('success');
+        session()->flash('success', 'Customer Sync Success');
+        $this->getBusiness();
+    }
+
     public function updatedSts()
     {
         $this->getBusiness();
@@ -71,82 +83,84 @@ class BusinessIndex extends Component
         $business = Business::find($id);
 
         $customerData = [
-            "customerName" => $business->name,
-            "customerCode" => null,
-            "customerCategoryID" => 1, // need adjustment
-            "receivableCoaNo" => null,
-            "paymentID" => 1, // 1 cash, 2 credit
-            "paymentDueDays" => $business->tenor,
-            "country" => "Indonesia",
-            "state" => "Indonesia",
-            "city" => null,
-            "district" => null,
-            "subDistrict" => null,
-            "zipCode" => null,
-            "address" => $business->address,
-            "block" => null,
-            "number" => null,
-            "rt" => null,
-            "rw" => null,
-            "phone1" => null,
-            "phone2" => null,
-            "fax" => null,
-            "salesRepID" => null,
-            "notes" => null,
-            "vatSubject" => 0, // need adjustment
-            "lockVAT" => 0, // need adjustment
-            "npwp" => $business->npwp,
-            "customerPic" => [
+            'customerName' => $business->name,
+            'customerCode' => null,
+            'customerCategoryID' => 1, // need adjustment
+            'receivableCoaNo' => null,
+            'paymentID' => 1, // 1 cash, 2 credit
+            'paymentDueDays' => $business->tenor,
+            'country' => 'Indonesia',
+            'state' => 'Indonesia',
+            'city' => null,
+            'district' => null,
+            'subDistrict' => null,
+            'zipCode' => null,
+            'address' => $business->address,
+            'block' => null,
+            'number' => null,
+            'rt' => null,
+            'rw' => null,
+            'phone1' => null,
+            'phone2' => null,
+            'fax' => null,
+            'salesRepID' => null,
+            'notes' => null,
+            'vatSubject' => 0, // need adjustment
+            'lockVAT' => 0, // need adjustment
+            'npwp' => $business->npwp,
+            'customerPic' => [
                 [
-                    "greetingID" => 1, // 1 Mr, 2 Mrs, 3 Ms
-                    "picName" => $business->representative,
-                    "email" => $business->user->email,
-                    "cellPhone" => $business->phone,
-                    "flagDefault" => 1,
-                    "flagSendingSOEmail" => 1
-                ]
+                    'greetingID' => 1, // 1 Mr, 2 Mrs, 3 Ms
+                    'picName' => $business->representative,
+                    'email' => $business->user->email,
+                    'cellPhone' => $business->phone,
+                    'flagDefault' => 1,
+                    'flagSendingSOEmail' => 1,
+                ],
             ],
-            "customerBank" => [
+            'customerBank' => [
                 [
-                    "bankName" => $business->bank,
-                    "bankAccountNumber" => $business->account_number,
-                    "bankAccountName" => $business->account_name
-                ]
+                    'bankName' => $business->bank,
+                    'bankAccountNumber' => $business->account_number,
+                    'bankAccountName' => $business->account_name,
+                ],
             ],
-            "customerBranch" => [
+            'customerBranch' => [
                 [
-                    "branchName" => null,
-                ]
+                    'branchName' => null,
+                ],
             ],
-            "customerTax" => [
-                "countryTax" => null,
-                "stateTax" => null,
-                "cityTax" => null,
-                "districtTax" => null,
-                "subDistrictTax" => null,
-                "zipCodeTax" => null,
-                "addressTax" => null,
-                "blockTax" => null,
-                "numberTax" => null,
-                "rtTax" => null,
-                "rwTax" => null,
-                "phoneTax" => null,
-                "flagReferAddress" => 0
+            'customerTax' => [
+                'countryTax' => null,
+                'stateTax' => null,
+                'cityTax' => null,
+                'districtTax' => null,
+                'subDistrictTax' => null,
+                'zipCodeTax' => null,
+                'addressTax' => null,
+                'blockTax' => null,
+                'numberTax' => null,
+                'rtTax' => null,
+                'rwTax' => null,
+                'phoneTax' => null,
+                'flagReferAddress' => 0,
             ],
         ];
 
         $response = $request->createCustomer($customerData);
 
-        if (!$response) {
+        if (! $response) {
             return;
         }
 
-        if ($response['status'] === "ok") {
+        if ($response['status'] === 'ok') {
             $business->update(['customerID' => $response['result']['customerID']]);
             session()->flash('success', 'Customer imported successfully!');
         } else {
             session()->flash('error', 'Failed to import customer.');
         }
+
+        $this->getBusiness();
     }
 
     public function syncCustomerFromESB($id)

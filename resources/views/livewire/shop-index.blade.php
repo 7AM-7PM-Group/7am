@@ -31,7 +31,7 @@
                 <div class="mt-4 mb-2">Category</div>
                 <flux:radio.group wire:model.live='category' class="">
                     @foreach ($categories as $item)
-                        <flux:radio :label="$item->name" :value="$item->slug"></flux:radio>
+                        <flux:radio :label="$item->categoryName" :value="$item->slug"></flux:radio>
                     @endforeach
                 </flux:radio.group>
 
@@ -44,14 +44,14 @@
             <div class="w-full transition-all bg-white dark:bg-gray-700 p-4 rounded-lg shadow-md md:w-3/4">
                 <div class="grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3 items-start">
                     @forelse ($products as $item)
-                        <button wire:click="openShowModal('{{ $item->jurnal_id }}')" class="text-center">
+                        <button wire:click="openShowModal('{{ $item->productID }}')" class="text-center">
                             <img class="aspect-square"
                                 src="{{ $item['image'] != '' ? $item['image'] : asset('assets/No-Picture-Found.png') }}"
                                 alt="Chocolate Croissant" class="rounded-lg shadow mb-2">
 
                             <div class="px-2 mt-2">
                                 <div class="flex justify-between items-center mb-2">
-                                    <p class="font-semibold text-md text-left">{{ $item->name }}</p>
+                                    <p class="font-semibold text-md text-left">{{ $item->productName }}</p>
                                 </div>
                                 <p class="text-[#D4A373] text-left">Rp.
                                     {{ number_format($item->display_price, 0, ',', '.') }}
