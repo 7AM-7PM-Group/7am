@@ -77,9 +77,9 @@ class DatabaseSeeder extends Seeder
 
         $this->call(RedeemPointSeeder::class);
 
-        $this->call(CategorySeeder::class);
-        $this->call(ProductSeeder::class);
-        $this->call(PricelistSeeder::class);
+        // $this->call(CategorySeeder::class);
+        // $this->call(ProductSeeder::class);
+        // $this->call(PricelistSeeder::class);
         // $this->call(CustomerPricelistSeeder::class);
 
         // $this->call(TransactionSeeder::class);

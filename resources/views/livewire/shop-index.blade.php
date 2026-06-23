@@ -31,7 +31,7 @@
                 <div class="mt-4 mb-2">Category</div>
                 <flux:radio.group wire:model.live='category' class="">
                     @foreach ($categories as $item)
-                        <flux:radio :label="$item->categoryName" :value="$item->slug"></flux:radio>
+                        <flux:radio :label="$item->subCategoryName" :value="$item->slug"></flux:radio>
                     @endforeach
                 </flux:radio.group>
 

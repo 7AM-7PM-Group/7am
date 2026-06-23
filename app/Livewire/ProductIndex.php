@@ -172,7 +172,7 @@ class ProductIndex extends Component
     public function render()
     {
 
-        $products = Product::filters(['search' => $this->search, 'category' => $this->category, 'sub_category' => $this->sub_category])->paginate($this->per_page)->withQueryString();
+        $products = Product::filters(['search' => $this->search, 'category' => $this->category, 'sub_category' => $this->sub_category])->active()->paginate($this->per_page)->withQueryString();
 
         // dd($products);
 

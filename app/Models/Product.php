@@ -57,7 +57,6 @@ class Product extends Model
         $customerId = Auth::user()?->businesses?->customerID;
 
         if (! $customerId) {
-            dd('customer not found');
 
             return $this->price;
         }
@@ -93,6 +92,12 @@ class Product extends Model
         return $this->belongsToMany(Coupon::class, CouponProduct::class);
     }
 
+    public function scopeActive(Builder $query, bool $active = true) {
+        $query->when($active, function($query, $active) {
+            return $query->where('active', $active);
+        });
+    }
+
     public function scopeFilters(Builder $query, array $filters)
     {
         $query->when($filters['search'] ?? false, function ($query, $search) {
@@ -123,26 +128,6 @@ class Product extends Model
         });
     }
 
-    public static function skuNumberGenerator()
-    {
-        $prefix = 'SKU-';
-
-        // Hitung jumlah produk yang sudah
-        $lastTransaction = self::orderBy('id', 'desc')
-            ->first();
-
-        $nextNumber = 1;
-
-        if ($lastTransaction) {
-            $lastNumber = (int) substr($lastTransaction->sku, -4);
-            $nextNumber = $lastNumber + 1;
-        }
-
-        $formattedNumber = str_pad($nextNumber, 4, '0', STR_PAD_LEFT);
-
-        return $prefix.$formattedNumber;
-    }
-
     public function getImageUrlAttribute()
     {
         if ($this->image) {
@@ -154,11 +139,21 @@ class Product extends Model
 
     public static function syncProduct()
     {
+        self::syncProductRequest(true);
+        self::syncProductRequest(false);
+
+    }
+
+    public static function syncProductRequest(bool $status) {
+
         $request = new ProductRequest(new EsbApiRequest(app(EsbApiAuth::class)));
         $page = 1;
+        $prefix = Setting::where('key', 'product_code_prefix')->value('value');
+
+        $active = $status ? "Yes" : 'No';
         do {
 
-            $response = $request->getMasterProducts(['page' => $page]);
+            $response = $request->getMasterProducts(['page' => $page, 'statusActive'=> $active]);
 
             if (! $response || $response['status'] === 'fail') {
                 if (config('app.debug')) {
@@ -172,6 +167,8 @@ class Product extends Model
             $result = $response['result']['data'];
 
             foreach ($result as $key => $item) {
+                if(!str_starts_with($item['productCode'], $prefix)) continue;
+
                 foreach ($item['productDetails'] as $detail) {
                     if ($detail['defaultUnit']['baseUnit']) {
                         $price = $detail['basePrice'];
@@ -184,10 +181,7 @@ class Product extends Model
 
                 $item['category_id'] = $item['categoryID'];
                 $item['sub_category_id'] = $item['subCategoryID'];
-
-                // dd(
-                //     $item
-                // );
+                $item['active']=$status;
 
                 Product::updateOrCreate(
                     ['productID' => $item['productID']],
@@ -196,6 +190,5 @@ class Product extends Model
             }
             $page++;
         } while ($response['next'] ?? false);
-
     }
 }

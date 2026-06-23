@@ -19,7 +19,6 @@ return new class extends Migration
             $table->string('categoryTypeName')->nullable();
             $table->text('notes')->nullable();
             $table->string('slug')->unique();
-            $table->boolean('active')->default(false);
             $table->timestamps();
         });
     }

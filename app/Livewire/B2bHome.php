@@ -27,7 +27,7 @@ class B2bHome extends Component
             // dd(false, $this->categories, $defaultSetCategory);
         }
         // dd($setCategory);
-        $this->products = Product::latest()->filters(['set_category' => $setCategory])->take(12)->get();
+        $this->products = Product::latest()->filters(['set_category' => $setCategory])->active()->take(12)->get();
     }
 
     public function openShowModal($productID)

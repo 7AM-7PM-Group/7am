@@ -4,15 +4,18 @@ namespace App\Livewire;
 
 use App\Models\Transaction;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Livewire\Component;
 
 class History extends Component
 {
-    public $transactions;
+    public $transactions, $oldTransaction;
 
     public function mount()
     {
         $this->getHistory();
+
+        $this->getOldHistory();
 
         // dd($this->transactions);
     }
@@ -20,6 +23,10 @@ class History extends Component
     public function getHistory()
     {
         $this->transactions = Transaction::where('user_id', Auth::user()->id)->latest('created_at')->get();
+    }
+
+    public function getOldHistory() {
+        $this->oldTransaction = DB::connection('mysql2')->table('transactions')->where('user_id', Auth::user()->id)->latest('created_at')->get() ?? collect();
     }
 
     public function cancelOrder($slug)

@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Product;
 use App\Models\SetCategory;
 use App\Models\Setting;
+use App\Models\SubCategory;
 use Illuminate\Support\Facades\Auth;
 use Livewire\Attributes\Url;
 use Livewire\Component;
@@ -33,20 +34,9 @@ class ShopIndex extends Component
     {
         $user = Auth::user();
 
-        // Jika user login, punya relasi Businesses, dan relasi setCategory pada salah satu Businesses
-        if ($user && $user->Businesses && $user->Businesses->setCategory) {
-            // Jika user punya bisnis dan bisnis itu punya setCategory
-            $this->categories = $user->Businesses?->setCategory?->categories ?? collect();
-
-            // dd(true, $this->categories);
-        } else {
-            // Jika tidak, gunakan set category default dari setting
-            // $defaultSetCategoryId = Setting::where('key', 'default_set_category')->value('value');
-            // $defaultSetCategory = SetCategory::find($defaultSetCategoryId);
-
-            $this->categories = Category::all() ?? collect();
-            // dd(false, $this->categories, $defaultSetCategory);
-        }
+        $this->categories =  SubCategory::whereHas('products', function ($query) {
+    $query->where('active', true);
+})->get();
 
         // dd(Auth::user()?->Businesses?->setCategory->id);
     }
@@ -73,7 +63,6 @@ class ShopIndex extends Component
     public function render()
     {
         // Ambil set_category terbaru langsung dari DB (menghindari relasi Auth yang stale)
-        $setCategoryId = null;
         // if (Auth::check()) {
         //     $setCategoryId = \App\Models\Business::where('user_id', Auth::id())
         //         ->whereNotNull('set_category_id')
@@ -88,11 +77,10 @@ class ShopIndex extends Component
 
         $products = Product::filters([
             'search' => $this->search,
-            'category' => $this->category,
+            'sub_category' => $this->category,
             'min' => $this->min,
             'max' => $this->max,
-            'set_category' => $setCategoryId,
-        ])->paginate(24)->withQueryString();
+        ])->active()->paginate(24)->withQueryString();
 
         // dd([
         //     'auth' => Auth::id(),

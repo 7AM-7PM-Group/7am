@@ -50,8 +50,9 @@ class CustomerPricelist extends Model
                 $product = Product::where('productName', $item['productName'])->first();
 
                 // dd($business, $product, $item);
-                CustomerPricelist::updateOrCreate(['customer_id' => $business->customerID, 'product_id' => $product->productID], ['price' => $item['price']]);
-            }
+                if($business->customerID??false) {
+                CustomerPricelist::updateOrCreate(['customer_id' => $business->customerID??null, 'product_id' => $product->productID], ['price' => $item['price']]);
+            }}
             $page++;
         } while ($response['next'] ?? false);
 
