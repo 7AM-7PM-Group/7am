@@ -12,4 +12,11 @@ class MigrationDb extends Model
     use HasFactory;
 
     public $guarded = ['id'];
+
+    protected function casts(): array
+    {
+        return [
+            'running_at' => 'datetime',
+        ];
+    }
 }

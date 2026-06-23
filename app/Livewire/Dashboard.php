@@ -6,19 +6,40 @@ use App\Models\Transaction;
 use App\Models\TransactionItem;
 use App\Models\User;
 use Carbon\Carbon;
-use Livewire\Component;
 use Illuminate\Support\Facades\DB;
+use Livewire\Component;
 
 class Dashboard extends Component
 {
+    public $title = 'B2B Dashboard';
 
-    public $title = "B2B Dashboard";
+    public $earningThisMonth;
 
-    public $earningThisMonth, $earningRatio;
-    public $transactionThisMonth, $transactionRatio;
-    public $productSoldThisMonth, $productSoldRatio;
-    public $newUserThisMonth, $newUserRatio;
-    public $topProducts, $topProduct, $chartData, $topMonthName, $topYear, $lastTransactions;
+    public $earningRatio;
+
+    public $transactionThisMonth;
+
+    public $transactionRatio;
+
+    public $productSoldThisMonth;
+
+    public $productSoldRatio;
+
+    public $newUserThisMonth;
+
+    public $newUserRatio;
+
+    public $topProducts;
+
+    public $topProduct;
+
+    public $chartData;
+
+    public $topMonthName;
+
+    public $topYear;
+
+    public $lastTransactions;
 
     public function mount()
     {
@@ -98,7 +119,7 @@ class Dashboard extends Component
             'product_id',
             DB::raw('SUM(qty * price) as total_sales')
         )
-            ->with('product:id,name')
+            ->with('product:id,productName')
             ->groupBy('product_id')
             ->orderByDesc('total_sales')
             ->take(4)
@@ -128,20 +149,19 @@ class Dashboard extends Component
             return Carbon::now()->subMonths(11 - $i)->format('Y-m');
         });
 
-        $this->chartData = $months->map(fn($m) => [
+        $this->chartData = $months->map(fn ($m) => [
             'month' => Carbon::createFromFormat('Y-m', $m)->translatedFormat('M Y'),
             'total' => $earnings[$m] ?? 0,
         ]);
 
         $topMonth = Transaction::selectRaw(
-            Transaction::yearFormat() . ' as year, ' .
-                Transaction::onlyMonthFormat() . ' as month, ' .
+            Transaction::yearFormat().' as year, '.
+                Transaction::onlyMonthFormat().' as month, '.
                 'SUM(total) as total'
         )
             ->groupBy('year', 'month')
             ->orderByDesc('total')
             ->first();
-
 
         if ($topMonth) {
             $topMonth->name = Carbon::create($topMonth->year, $topMonth->month, 1)->translatedFormat('F Y');
@@ -151,7 +171,7 @@ class Dashboard extends Component
 
         // === Top Year (Tahun dengan Penjualan Tertinggi Sepanjang Waktu) ===
         $this->topYear = Transaction::selectRaw(
-            Transaction::yearFormat() . ' as year, ' . '
+            Transaction::yearFormat().' as year, '.'
                 SUM(total) as total'
         )
             ->groupBy('year')
@@ -162,8 +182,6 @@ class Dashboard extends Component
             ->take(9)  // ambil 8 transaksi terakhir
             ->get();
     }
-
-
 
     public function render()
     {

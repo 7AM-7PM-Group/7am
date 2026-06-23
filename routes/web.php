@@ -1,11 +1,10 @@
 <?php
 
 use App\Http\Controllers\ApiTestController;
-use App\Http\Controllers\JurnalAuthController;
+use App\Http\Controllers\MailController;
 use App\Livewire\EsbLogIndex;
 use Illuminate\Support\Facades\Route;
 use Livewire\Volt\Volt;
-
 
 Volt::route('/', 'home')->name('home');
 Volt::route('reservation', 'reservation-create')->name('reservation');
@@ -45,6 +44,7 @@ Route::middleware(['auth', 'verified', 'admin'])->group(function () {
 
     Volt::route('redeem-reward', 'redeem-index')->name('redeem.index');
     Volt::route('our-promotions', 'promotion-index')->name('promotion.index');
+    Volt::route('migration', 'migration-index')->name('migration.index');
 });
 
 Route::prefix('b2b')->group(function () {
@@ -79,7 +79,6 @@ Route::prefix('b2b')->middleware(['auth', 'verified', 'sales-admin'])->group(fun
     Volt::route('pricelists', 'pricelist-index')->name('pricelist.index');
 });
 
-
 Route::prefix('b2b')->middleware(['auth', 'verified', 'customer'])->group(function () {
     Volt::route('cart', 'cart')->name('cart');
     Volt::route('history', 'history')->name('history');
@@ -101,7 +100,7 @@ Route::prefix('b2b')->middleware(['auth', 'verified', 'admin'])->group(function 
 
 Volt::route('outlets/{slug}', 'outlet-show')->name('outlet-show');
 
-Route::get('/test-email', [App\Http\Controllers\MailController::class, 'sendTestEmail']);
+Route::get('/test-email', [MailController::class, 'sendTestEmail']);
 Route::resource('/api/test', ApiTestController::class)->names('jurnal.tests');
 
-require __DIR__ . '/auth.php';
+require __DIR__.'/auth.php';
